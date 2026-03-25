@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Computación Cuántica: Ideas claras, impacto real</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    :root {
+      --ink: #1a1f2b;
+      --paper: #f7f3ee;
+      --mist: #e9e2d8;
+      --accent: #1f8a70;
+      --accent-2: #f2b134;
+      --accent-3: #7a4e2d;
+      --shadow: rgba(26, 31, 43, 0.12);
+      --glow: rgba(31, 138, 112, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 20% 10%, #fff6ea 0%, transparent 45%),
+        radial-gradient(circle at 85% 0%, #e3f4f0 0%, transparent 40%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 100%);
+      min-height: 100vh;
+    }
+
+    header {
+      position: relative;
+      padding: 6rem 6vw 4rem;
+      overflow: hidden;
+    }
+
+    header::before,
+    header::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(0.2rem);
+      opacity: 0.7;
+      animation: float 14s ease-in-out infinite;
+    }
+
+    header::before {
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(31, 138, 112, 0.35), transparent 70%);
+      top: -80px;
+      left: -80px;
+    }
+
+    header::after {
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(242, 177, 52, 0.4), transparent 70%);
+      top: 40px;
+      right: -100px;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(10px, -18px, 0); }
+    }
+
+    .hero {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.6rem, 3.8vw, 4.2rem);
+      line-height: 1.05;
+      color: #1b1b1b;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #2f3441;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      padding: 0.85rem 1.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+    }
+
+    .cta.primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 14px 30px var(--glow);
+    }
+
+    .cta.secondary {
+      background: #fff;
+      color: var(--accent-3);
+      border: 1px solid rgba(122, 78, 45, 0.2);
+    }
+
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px var(--shadow);
+    }
+
+    .hero-card {
+      background: rgba(255, 255, 255, 0.86);
+      border-radius: 28px;
+      padding: 2rem;
+      box-shadow: 0 20px 50px var(--shadow);
+      backdrop-filter: blur(12px);
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .hero-card h3 {
+      font-family: "Fraunces", serif;
+      font-size: 1.4rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(31, 138, 112, 0.12);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 6vw 6rem;
+      display: grid;
+      gap: 3.5rem;
+    }
+
+    .section-title {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+      margin-bottom: 1rem;
+    }
+
+    .cards {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 1.6rem;
+      box-shadow: 0 18px 40px var(--shadow);
+      display: grid;
+      gap: 0.8rem;
+      border: 1px solid rgba(26, 31, 43, 0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .card strong {
+      font-size: 1.05rem;
+    }
+
+    .glossary {
+      display: grid;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 24px;
+      padding: 2rem;
+      border: 1px solid rgba(31, 138, 112, 0.2);
+      box-shadow: 0 20px 40px var(--shadow);
+    }
+
+    .glossary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .timeline-item {
+      display: grid;
+      gap: 0.4rem;
+      padding: 1rem 1.2rem;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 14px 28px var(--shadow);
+    }
+
+    .timeline-item span {
+      font-weight: 600;
+      color: var(--accent-3);
+    }
+
+    .callout {
+      background: linear-gradient(120deg, rgba(31, 138, 112, 0.15), rgba(242, 177, 52, 0.2));
+      border-radius: 30px;
+      padding: 2.2rem;
+      display: grid;
+      gap: 1rem;
+      box-shadow: 0 22px 45px var(--shadow);
+    }
+
+    .callout ul {
+      list-style: none;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .callout li::before {
+      content: "◆";
+      margin-right: 0.6rem;
+      color: var(--accent);
+    }
+
+    footer {
+      padding: 2rem 6vw 3rem;
+      font-size: 0.9rem;
+      color: #5a5f6d;
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.5rem 6vw 0;
+      font-size: 0.95rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-weight: 600;
+    }
+
+    .brand img {
+      width: 56px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+    }
+
+    .team-name {
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+      color: #1b1b1b;
+    }
+
+    .directory {
+      display: grid;
+      gap: 0.25rem;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #2f3441;
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .directory {
+        text-align: left;
+      }
+
+      header {
+        padding-top: 4.5rem;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <img src="assets/unam-logo.png" alt="Logo UNAM" />
+      <div class="team-name">Grupo de Computacion Cuantica en el CNyN</div>
+    </div>
+    <div class="directory">
+      <strong>Directorio</strong>
+      <span>M. en C. Fernando Nieto Guadarrama.</span>
+      <span>Dr. Fernando Rojas Iniguez.</span>
+    </div>
+  </div>
+  <header>
+    <div class="hero">
+      <div>
+        <span class="tag">Divulgación aplicada</span>
+        <h1>Computación cuántica sin humo: de la teoría a la acción.</h1>
+        <p>
+          Una guía clara para entender qué es un qubit, por qué el entrelazamiento es tan potente y en qué problemas reales
+          tiene sentido pensar en lo cuántico hoy.
+        </p>
+        <div class="hero-actions">
+          <a class="cta primary" href="simulador.html">Ir al simulador</a>
+          <a class="cta secondary" href="#conceptos">Explorar conceptos</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <h3>Mapa rápido</h3>
+        <p>Si solo tienes 4 minutos, quédate con esto:</p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <span>1. Qubit</span>
+            <p>Unidad básica que puede describirse con combinaciones de estados.</p>
+          </div>
+          <div class="timeline-item">
+            <span>2. Entrelazamiento</span>
+            <p>Correlaciones que no se explican con intuiciones clásicas.</p>
+          </div>
+          <div class="timeline-item">
+            <span>3. Algoritmos</span>
+            <p>Patrones que aprovechan interferencia para acelerar tareas específicas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="conceptos">
+      <h2 class="section-title">Conceptos clave, sin jerga innecesaria</h2>
+      <div class="cards">
+        <article class="card">
+          <strong>Superposición</strong>
+          <p>Un qubit puede describirse como una combinación de “0” y “1”, lo que abre nuevas formas de codificar información.</p>
+        </article>
+        <article class="card">
+          <strong>Entrelazamiento</strong>
+          <p>Dos qubits pueden compartir un estado común. Medir uno afecta la descripción del otro, incluso a distancia.</p>
+        </article>
+        <article class="card">
+          <strong>Interferencia</strong>
+          <p>Las amplitudes cuánticas pueden reforzarse o cancelarse para destacar respuestas correctas.</p>
+        </article>
+        <article class="card">
+          <strong>Ruido</strong>
+          <p>Los dispositivos reales son sensibles a perturbaciones, por eso la corrección de errores es vital.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="glossary">
+      <h2 class="section-title">Glosario práctico</h2>
+      <div class="glossary-item">
+        <strong>Estado cuántico</strong>
+        <p>Representación matemática de un qubit (o varios) en un instante.</p>
+      </div>
+      <div class="glossary-item">
+        <strong>Medición</strong>
+        <p>Proceso que devuelve un resultado clásico y cambia el estado del sistema.</p>
+      </div>
+      <div class="glossary-item">
+        <strong>Puertas cuánticas</strong>
+        <p>Operaciones básicas que transforman estados y permiten construir algoritmos.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Dónde impacta hoy</h2>
+      <div class="cards">
+        <article class="card">
+          <strong>Optimización</strong>
+          <p>Planificación logística, rutas eficientes y asignación de recursos complejos.</p>
+        </article>
+        <article class="card">
+          <strong>Química y materiales</strong>
+          <p>Simulación de moléculas para nuevos fármacos y baterías más eficientes.</p>
+        </article>
+        <article class="card">
+          <strong>Seguridad</strong>
+          <p>Nuevos métodos de criptografía y revisión de protocolos clásicos.</p>
+        </article>
+        <article class="card">
+          <strong>IA híbrida</strong>
+          <p>Investigación en modelos que combinan aprendizaje clásico con circuitos cuánticos.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="callout">
+      <h2 class="section-title">Checklist para evaluar noticias cuánticas</h2>
+      <ul>
+        <li>¿El problema es específico y bien definido?</li>
+        <li>¿Se compara con métodos clásicos de referencia?</li>
+        <li>¿Se reporta tamaño del sistema y tasa de error?</li>
+        <li>¿Hay datos abiertos o reproducibles?</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    Diseñado para divulgar sin perder rigor. Ajusta esta página con tu propio contenido y enlaces educativos.
+  </footer>
+</body>
+</html>
