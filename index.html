@@ -193,6 +193,16 @@
       transition: transform 0.2s ease;
     }
 
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card-link:focus-visible {
+      outline: 3px solid rgba(31, 138, 112, 0.35);
+      outline-offset: 4px;
+    }
+
     .card:hover {
       transform: translateY(-4px);
     }
@@ -330,7 +340,7 @@
 <body>
   <div class="topbar">
     <div class="brand">
-      <img src="assets/unam-logo.png" alt="Logo UNAM" />
+      <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
       <div class="team-name">Grupo de Computacion Cuantica en el CNyN</div>
     </div>
     <div class="directory">
@@ -351,6 +361,7 @@
         <div class="hero-actions">
           <a class="cta primary" href="simulador.html">Ir al simulador</a>
           <a class="cta secondary" href="#conceptos">Explorar conceptos</a>
+          <a class="cta secondary" href="laboratorio-bloch.html">Laboratorio de Bloch</a>
         </div>
       </div>
       <div class="hero-card">
@@ -378,14 +389,14 @@
     <section id="conceptos">
       <h2 class="section-title">Conceptos clave, sin jerga innecesaria</h2>
       <div class="cards">
-        <article class="card">
+        <a class="card card-link" href="superposicion.html">
           <strong>Superposición</strong>
           <p>Un qubit puede describirse como una combinación de “0” y “1”, lo que abre nuevas formas de codificar información.</p>
-        </article>
-        <article class="card">
+        </a>
+        <a class="card card-link" href="entrelazamiento.html">
           <strong>Entrelazamiento</strong>
           <p>Dos qubits pueden compartir un estado común. Medir uno afecta la descripción del otro, incluso a distancia.</p>
-        </article>
+        </a>
         <article class="card">
           <strong>Interferencia</strong>
           <p>Las amplitudes cuánticas pueden reforzarse o cancelarse para destacar respuestas correctas.</p>

@@ -35,6 +35,26 @@
       min-height: 100vh;
     }
 
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 6vw 0;
+    }
+
+    .topbar img {
+      width: 56px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+    }
+
+    .topbar .team-name {
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+      color: #1b1b1b;
+    }
+
     .shell {
       min-height: 100vh;
       display: grid;
@@ -80,6 +100,10 @@
   </style>
 </head>
 <body>
+  <div class="topbar">
+    <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    <div class="team-name">Grupo de Computacion Cuantica en el CNyN</div>
+  </div>
   <main class="shell">
     <section class="placeholder">
       <h1>Simulador de 2 Qubits</h1>

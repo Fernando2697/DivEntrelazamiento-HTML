@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Laboratorio de Rotaciones en la Esfera de Bloch</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    :root {
+      --ink: #1a1f2b;
+      --paper: #f7f3ee;
+      --mist: #e9e2d8;
+      --accent: #1f8a70;
+      --accent-2: #f2b134;
+      --accent-3: #7a4e2d;
+      --shadow: rgba(26, 31, 43, 0.12);
+      --glow: rgba(31, 138, 112, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(31, 138, 112, 0.18), transparent 45%),
+        radial-gradient(circle at 85% 10%, rgba(242, 177, 52, 0.2), transparent 42%),
+        radial-gradient(circle at 70% 85%, rgba(26, 31, 43, 0.08), transparent 55%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 100%);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 6vw 0;
+    }
+
+    .topbar img {
+      width: 56px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+    }
+
+    .topbar .team-name {
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+      color: #1b1b1b;
+    }
+
+    .shell {
+      min-height: 100vh;
+      padding: 5.5rem 6vw 6rem;
+      display: grid;
+      gap: 2.5rem;
+    }
+
+    .header {
+      display: grid;
+      gap: 0.6rem;
+      max-width: 920px;
+    }
+
+    .header h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.4rem, 3.6vw, 3.8rem);
+    }
+
+    .header p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #2f3441;
+    }
+
+    .lab-grid {
+      display: grid;
+      gap: 1.8rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      align-items: stretch;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.86);
+      border-radius: 28px;
+      padding: 1.8rem;
+      box-shadow: 0 20px 50px var(--shadow);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      backdrop-filter: blur(12px);
+      min-height: 260px;
+    }
+
+    .panel h2 {
+      font-family: "Fraunces", serif;
+      font-size: 1.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .panel p {
+      color: #2f3441;
+      line-height: 1.6;
+    }
+
+    .panel ul {
+      list-style: none;
+      display: grid;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .panel li::before {
+      content: "◆";
+      margin-right: 0.6rem;
+      color: var(--accent);
+    }
+
+    .bloch-stage {
+      display: grid;
+      place-items: center;
+      min-height: 340px;
+      border-radius: 24px;
+      background: linear-gradient(130deg, rgba(31, 138, 112, 0.12), rgba(242, 177, 52, 0.15));
+      border: 1px dashed rgba(31, 138, 112, 0.3);
+      margin-top: 1rem;
+      font-weight: 600;
+      color: #415260;
+    }
+
+    .optimization {
+      background: rgba(255, 255, 255, 0.84);
+      border-radius: 30px;
+      padding: 2.2rem;
+      box-shadow: 0 24px 55px var(--shadow);
+      border: 1px solid rgba(122, 78, 45, 0.15);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .optimization h2 {
+      font-family: "Fraunces", serif;
+      font-size: 1.7rem;
+    }
+
+    .backlink {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--accent-3);
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    .backlink::before {
+      content: "←";
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    <div class="team-name">Grupo de Computacion Cuantica en el CNyN</div>
+  </div>
+  <main class="shell">
+    <header class="header">
+      <h1>Laboratorio de Rotaciones en la Esfera de Bloch</h1>
+      <p>
+        Espacio de trabajo para explorar rotaciones de un qubit, operadores y compuertas. Aqui se integrara
+        una visualizacion interactiva de la esfera de Bloch y controles para experimentar con gates.
+      </p>
+      <a class="backlink" href="index.html">Volver a la pagina principal</a>
+    </header>
+
+    <section class="lab-grid">
+      <article class="panel">
+        <h2>Panel de Rotaciones</h2>
+        <p>Zona reservada para controles de operadores de rotacion alrededor de ejes X, Y y Z.</p>
+        <ul>
+          <li>Deslizadores de angulo</li>
+          <li>Selector de eje</li>
+          <li>Historial de operaciones</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h2>Compuertas de un Qubit</h2>
+        <p>Aqui iran los botones de puertas basicas y compuestas (H, X, Y, Z, S, T).</p>
+        <ul>
+          <li>Vista de matriz</li>
+          <li>Composicion de gates</li>
+          <li>Indicador de fase global</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h2>Esfera de Bloch</h2>
+        <p>Area principal de visualizacion del estado del qubit.</p>
+        <div class="bloch-stage">Area de la esfera de Bloch</div>
+      </article>
+    </section>
+
+    <section class="optimization">
+      <h2>Problema de Optimizacion</h2>
+      <p>
+        Debajo de la esfera se integrara un escenario de optimizacion para aplicar las rotaciones y compuertas
+        a un objetivo concreto. Esta seccion contiene el contenedor visual y las pistas de contexto.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
