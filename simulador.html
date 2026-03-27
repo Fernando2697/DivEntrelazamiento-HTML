@@ -153,6 +153,7 @@
       color: #1b1b1b;
     }
 
+
     .histogram {
       display: grid;
       gap: 1rem;
@@ -281,9 +282,74 @@
     }
 
     .gate-slot .gate-token.cz {
-      background: rgba(242, 177, 52, 0.2);
-      border-color: rgba(242, 177, 52, 0.6);
-      color: #6a3e10;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #f2b134;
+      border: 2px solid rgba(106, 62, 16, 0.8);
+      color: transparent;
+    }
+
+    .gate-slot.has-cz::after,
+    .gate-slot.has-cnot::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      background: rgba(106, 62, 16, 0.9);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 0;
+    }
+
+    .gate-slot.has-cz[data-qubit="0"]::after,
+    .gate-slot.has-cnot[data-qubit="0"]::after {
+      top: 50%;
+      height: 64px;
+    }
+
+    .gate-slot.has-cz[data-qubit="1"]::after,
+    .gate-slot.has-cnot[data-qubit="1"]::after {
+      bottom: 50%;
+      height: 64px;
+    }
+
+    .gate-slot .gate-token.cnot-control {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #1f2a2a;
+      border: 2px solid #1f2a2a;
+      color: transparent;
+    }
+
+    .gate-slot .gate-token.cnot-target {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #1f2a2a;
+      position: relative;
+      color: transparent;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .gate-slot .gate-token.cnot-target::before,
+    .gate-slot .gate-token.cnot-target::after {
+      content: "";
+      position: absolute;
+      background: #1f2a2a;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .gate-slot .gate-token.cnot-target::before {
+      width: 10px;
+      height: 2px;
+    }
+
+    .gate-slot .gate-token.cnot-target::after {
+      width: 2px;
+      height: 10px;
     }
 
     .gate-slot[data-dropzone="true"]:hover {
@@ -326,6 +392,13 @@
           espacios listos para colocar compuertas y visualizar el circuito de forma grafica cuando se habilite el
           arrastre.
         </p>
+        <p><strong>Instrucciones rapidas:</strong></p>
+        <ul>
+          <li>Arrastra una compuerta a un espacio vacio. Si ya hay una compuerta, se mueve una posicion a la derecha.</li>
+          <li>Para Rx o Rz, al soltar se te pide un numero como fraccion de 2π (ej. 0.25 = π/2).</li>
+          <li>Al soltar CNOT o CZ, el qubit donde sueltas es el objetivo y el otro es el control.</li>
+          <li>Quita compuertas con click o doble click sobre el slot.</li>
+        </ul>
       </div>
       <div class="gate-menu" aria-label="Menu de compuertas">
         <h2>Compuertas disponibles</h2>
@@ -333,9 +406,10 @@
           <div class="gate-chip" draggable="true" data-gate="X">X</div>
           <div class="gate-chip" draggable="true" data-gate="Z">Z</div>
           <div class="gate-chip" draggable="true" data-gate="H">H</div>
-          <div class="gate-chip" draggable="true" data-gate="Rx">Rx <small>(π/2)</small></div>
-          <div class="gate-chip" draggable="true" data-gate="Rz">Rz <small>(π/2)</small></div>
+          <div class="gate-chip" draggable="true" data-gate="Rx">Rx</div>
+          <div class="gate-chip" draggable="true" data-gate="Rz">Rz</div>
           <div class="gate-chip" draggable="true" data-gate="CZ">CZ</div>
+          <div class="gate-chip" draggable="true" data-gate="CNOT">CNOT</div>
         </div>
         <div class="state-panel">
           <div>Estado actual:</div>
@@ -412,6 +486,9 @@
 
     const placedGates = Array.from({ length: 2 }, () => Array(totalSlots).fill(null));
 
+    const GATE_CZ = 'CZ';
+    const GATE_CNOT = 'CNOT';
+
     const complex = (re, im = 0) => ({ re, im });
     const add = (a, b) => complex(a.re + b.re, a.im + b.im);
     const mul = (a, b) => complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
@@ -457,6 +534,26 @@
       [complex(0), complex(0), complex(1), complex(0)],
       [complex(0), complex(0), complex(0), complex(-1)]
     ];
+
+    const gateCNOT01 = () => [
+      [complex(1), complex(0), complex(0), complex(0)],
+      [complex(0), complex(1), complex(0), complex(0)],
+      [complex(0), complex(0), complex(0), complex(1)],
+      [complex(0), complex(0), complex(1), complex(0)]
+    ];
+
+    const gateCNOT10 = () => [
+      [complex(1), complex(0), complex(0), complex(0)],
+      [complex(0), complex(0), complex(0), complex(1)],
+      [complex(0), complex(0), complex(1), complex(0)],
+      [complex(0), complex(1), complex(0), complex(0)]
+    ];
+
+    const isTwoQubitGate = (gateData) =>
+      gateData?.type === GATE_CZ || gateData?.type === GATE_CNOT;
+
+    const slotHasTwoQubitGate = (slotIndex) =>
+      isTwoQubitGate(placedGates[0][slotIndex]) || isTwoQubitGate(placedGates[1][slotIndex]);
 
     const applySingleQubitGate = (state, gate, target) => {
       const out = [complex(0), complex(0), complex(0), complex(0)];
@@ -524,25 +621,32 @@
       for (let slot = 0; slot < totalSlots; slot += 1) {
         const gateTop = placedGates[0][slot];
         const gateBottom = placedGates[1][slot];
-        const hasCZ = gateTop === 'CZ' || gateBottom === 'CZ';
+        const hasCZ = gateTop?.type === GATE_CZ || gateBottom?.type === GATE_CZ;
+        const hasCNOT = gateTop?.type === GATE_CNOT || gateBottom?.type === GATE_CNOT;
 
-        if (gateTop && gateTop !== 'CZ') {
+        if (gateTop && !isTwoQubitGate(gateTop)) {
           state = applySingleQubitGate(state, buildGate(gateTop), 0);
         }
-        if (gateBottom && gateBottom !== 'CZ') {
+        if (gateBottom && !isTwoQubitGate(gateBottom)) {
           state = applySingleQubitGate(state, buildGate(gateBottom), 1);
         }
         if (hasCZ) {
           state = applyTwoQubitGate(state, gateCZ());
+        }
+        if (hasCNOT) {
+          if (gateTop?.role === 'control' && gateBottom?.role === 'target') {
+            state = applyTwoQubitGate(state, gateCNOT01());
+          } else if (gateTop?.role === 'target' && gateBottom?.role === 'control') {
+            state = applyTwoQubitGate(state, gateCNOT10());
+          }
         }
       }
       renderState(state);
       renderHistogram(state);
     };
 
-    const buildGate = (gateName) => {
-      const angle = Math.PI / 2;
-      switch (gateName) {
+    const buildGate = (gateData) => {
+      switch (gateData.type) {
         case 'X':
           return gateX();
         case 'Z':
@@ -550,9 +654,9 @@
         case 'H':
           return gateH();
         case 'Rx':
-          return gateRx(angle);
+          return gateRx(gateData.theta);
         case 'Rz':
-          return gateRz(angle);
+          return gateRz(gateData.theta);
         default:
           return gateH();
       }
@@ -560,13 +664,26 @@
 
     const clearSlot = (slotEl) => {
       slotEl.innerHTML = '';
+      slotEl.classList.remove('has-cz', 'has-cnot');
     };
 
     const placeGateToken = (slotEl, gateName) => {
       clearSlot(slotEl);
       const token = document.createElement('div');
-      token.className = `gate-token${gateName === 'CZ' ? ' cz' : ''}`;
-      token.textContent = gateName;
+      if (gateName?.type === GATE_CZ) {
+        token.className = 'gate-token cz';
+        slotEl.classList.add('has-cz');
+      } else if (gateName?.type === GATE_CNOT) {
+        if (gateName.role === 'control') {
+          token.className = 'gate-token cnot-control';
+        } else {
+          token.className = 'gate-token cnot-target';
+        }
+        slotEl.classList.add('has-cnot');
+      } else {
+        token.className = 'gate-token';
+        token.textContent = gateName.label;
+      }
       slotEl.appendChild(token);
     };
 
@@ -584,6 +701,66 @@
       if (slotEl) {
         clearSlot(slotEl);
       }
+    };
+
+    const shiftSlotRight = (slotIndex) => {
+      if (slotIndex >= totalSlots - 1) return false;
+      const nextIndex = slotIndex + 1;
+      const nextOccupied = slotHasTwoQubitGate(nextIndex) ||
+        placedGates[0][nextIndex] || placedGates[1][nextIndex];
+      if (nextOccupied) {
+        if (!shiftSlotRight(nextIndex)) return false;
+      }
+      const top = placedGates[0][slotIndex];
+      const bottom = placedGates[1][slotIndex];
+      if (top) updateGateGrid(0, nextIndex, top);
+      if (bottom) updateGateGrid(1, nextIndex, bottom);
+      clearGateGrid(0, slotIndex);
+      clearGateGrid(1, slotIndex);
+      return true;
+    };
+
+    const shiftSingleRight = (qubit, slotIndex) => {
+      if (slotIndex >= totalSlots - 1) return false;
+      if (slotHasTwoQubitGate(slotIndex)) {
+        return shiftSlotRight(slotIndex);
+      }
+      const gateHere = placedGates[qubit][slotIndex];
+      if (!gateHere) return true;
+      const nextIndex = slotIndex + 1;
+      if (slotHasTwoQubitGate(nextIndex)) {
+        if (!shiftSlotRight(nextIndex)) return false;
+      } else if (placedGates[qubit][nextIndex]) {
+        if (!shiftSingleRight(qubit, nextIndex)) return false;
+      }
+      updateGateGrid(qubit, nextIndex, gateHere);
+      clearGateGrid(qubit, slotIndex);
+      return true;
+    };
+
+    const makeRoomForGate = (qubit, slotIndex, gateType) => {
+      if (gateType === GATE_CZ || gateType === GATE_CNOT) {
+        if (slotHasTwoQubitGate(slotIndex) || placedGates[0][slotIndex] || placedGates[1][slotIndex]) {
+          return shiftSlotRight(slotIndex);
+        }
+        return true;
+      }
+      if (placedGates[qubit][slotIndex] || slotHasTwoQubitGate(slotIndex)) {
+        return shiftSingleRight(qubit, slotIndex);
+      }
+      return true;
+    };
+
+    const askRotationFraction = (gateLabel) => {
+      const message = `Ingresa θ como fraccion de 2π para ${gateLabel} (ej. 0.25 = π/2, 1 = 2π):`;
+      const raw = window.prompt(message, '0.25');
+      if (raw === null) return null;
+      const value = Number(raw.trim());
+      if (Number.isNaN(value)) {
+        window.alert('Valor invalido. Usa un numero como 0.25 o 0.5.');
+        return null;
+      }
+      return value * 2 * Math.PI;
     };
 
     paletteGates.forEach((gate) => {
@@ -612,26 +789,46 @@
         const slotIndex = Number(slotEl.dataset.slot) - 1;
 
         if (gateName === 'CZ') {
-          updateGateGrid(0, slotIndex, 'CZ');
-          updateGateGrid(1, slotIndex, 'CZ');
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          updateGateGrid(0, slotIndex, { type: GATE_CZ });
+          updateGateGrid(1, slotIndex, { type: GATE_CZ });
+        } else if (gateName === 'CNOT') {
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          if (qubit === 0) {
+            updateGateGrid(0, slotIndex, { type: GATE_CNOT, role: 'target' });
+            updateGateGrid(1, slotIndex, { type: GATE_CNOT, role: 'control' });
+          } else {
+            updateGateGrid(0, slotIndex, { type: GATE_CNOT, role: 'control' });
+            updateGateGrid(1, slotIndex, { type: GATE_CNOT, role: 'target' });
+          }
+        } else if (gateName === 'Rx' || gateName === 'Rz') {
+          const theta = askRotationFraction(gateName);
+          if (theta === null) return;
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          updateGateGrid(qubit, slotIndex, { type: gateName, theta, label: gateName });
         } else {
-          updateGateGrid(qubit, slotIndex, gateName);
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          updateGateGrid(qubit, slotIndex, { type: gateName, label: gateName });
         }
         recomputeState();
       });
 
-      slotEl.addEventListener('dblclick', () => {
+      const removeGateFromSlot = () => {
         const qubit = Number(slotEl.dataset.qubit);
         const slotIndex = Number(slotEl.dataset.slot) - 1;
         const gateName = placedGates[qubit][slotIndex];
-        if (gateName === 'CZ') {
+        if (!gateName) return;
+        if (gateName.type === GATE_CZ || gateName.type === GATE_CNOT) {
           clearGateGrid(0, slotIndex);
           clearGateGrid(1, slotIndex);
         } else {
           clearGateGrid(qubit, slotIndex);
         }
         recomputeState();
-      });
+      };
+
+      slotEl.addEventListener('click', removeGateFromSlot);
+      slotEl.addEventListener('dblclick', removeGateFromSlot);
     });
 
     recomputeState();
