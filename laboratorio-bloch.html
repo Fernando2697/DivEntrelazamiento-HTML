@@ -82,7 +82,7 @@
     .lab-grid {
       display: grid;
       gap: 1.8rem;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       align-items: stretch;
     }
 
@@ -93,7 +93,11 @@
       box-shadow: 0 20px 50px var(--shadow);
       border: 1px solid rgba(31, 138, 112, 0.18);
       backdrop-filter: blur(12px);
-      min-height: 260px;
+      min-height: 420px;
+    }
+
+    .panel.bloch-panel {
+      padding: 2.2rem;
     }
 
     .panel h2 {
@@ -123,13 +127,112 @@
     .bloch-stage {
       display: grid;
       place-items: center;
-      min-height: 340px;
-      border-radius: 24px;
-      background: linear-gradient(130deg, rgba(31, 138, 112, 0.12), rgba(242, 177, 52, 0.15));
-      border: 1px dashed rgba(31, 138, 112, 0.3);
+      min-height: 360px;
+      border-radius: 28px;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(237, 237, 237, 0.95));
+      border: 1px solid rgba(26, 31, 43, 0.12);
+      box-shadow: 0 20px 40px rgba(26, 31, 43, 0.1);
       margin-top: 1rem;
       font-weight: 600;
-      color: #415260;
+      color: #2f3441;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bloch-stage::after {
+      content: "";
+      position: absolute;
+      inset: 12% 14%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.8), transparent 70%);
+      filter: blur(4px);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .gate-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-top: 1rem;
+    }
+
+    .gate-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 138, 112, 0.35);
+      background: linear-gradient(120deg, rgba(31, 138, 112, 0.14), rgba(242, 177, 52, 0.12));
+      color: var(--accent-3);
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+    }
+
+    .gate-chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(26, 31, 43, 0.14);
+    }
+
+    .gate-chip:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 16px rgba(26, 31, 43, 0.16);
+    }
+
+    .bloch-canvas {
+      width: min(460px, 92%);
+      aspect-ratio: 1 / 1;
+    }
+
+    .bloch-overlay {
+      position: absolute;
+      bottom: 0.9rem;
+      left: 1rem;
+      right: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #2f3441;
+    }
+
+    .state-pill {
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(26, 31, 43, 0.12);
+      font-weight: 600;
+    }
+
+    .angle-controls {
+      margin-top: 1rem;
+      display: grid;
+      gap: 0.6rem;
+      padding: 0.9rem;
+      border-radius: 16px;
+      border: 1px solid rgba(26, 31, 43, 0.08);
+      background: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .angle-row {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .angle-row input[type="range"] {
+      flex: 1;
+      min-width: 160px;
     }
 
     .optimization {
@@ -179,29 +282,38 @@
 
     <section class="lab-grid">
       <article class="panel">
-        <h2>Panel de Rotaciones</h2>
-        <p>Zona reservada para controles de operadores de rotacion alrededor de ejes X, Y y Z.</p>
-        <ul>
-          <li>Deslizadores de angulo</li>
-          <li>Selector de eje</li>
-          <li>Historial de operaciones</li>
-        </ul>
+        <h2>Compuertas de un Qubit (simulador)</h2>
+        <p>Haz click en una compuerta para ver como se mueve el estado sobre la esfera de Bloch.</p>
+        <div class="gate-palette" aria-label="Compuertas de un qubit">
+          <button class="gate-chip" data-gate="H" type="button">H</button>
+          <button class="gate-chip" data-gate="X" type="button">X</button>
+          <button class="gate-chip" data-gate="Z" type="button">Z</button>
+          <button class="gate-chip" data-gate="Rx" type="button">Rx</button>
+          <button class="gate-chip" data-gate="Rz" type="button">Rz</button>
+        </div>
+        <div class="angle-controls">
+          <div class="angle-row">
+            <strong>Angulo:</strong>
+            <span id="angle-deg-label">90°</span>
+            <span id="angle-rad-label">(π/2)</span>
+          </div>
+          <div class="angle-row">
+            <input id="angle-slider" type="range" min="-180" max="180" value="90" step="5" />
+            <input id="angle-input" type="number" min="-180" max="180" value="90" step="5" />
+          </div>
+        </div>
       </article>
 
-      <article class="panel">
-        <h2>Compuertas de un Qubit</h2>
-        <p>Aqui iran los botones de puertas basicas y compuestas (H, X, Y, Z, S, T).</p>
-        <ul>
-          <li>Vista de matriz</li>
-          <li>Composicion de gates</li>
-          <li>Indicador de fase global</li>
-        </ul>
-      </article>
-
-      <article class="panel">
+      <article class="panel bloch-panel">
         <h2>Esfera de Bloch</h2>
-        <p>Area principal de visualizacion del estado del qubit.</p>
-        <div class="bloch-stage">Area de la esfera de Bloch</div>
+        <p>Vista 3D simplificada con proyeccion en perspectiva y el vector de estado.</p>
+        <div class="bloch-stage">
+          <canvas class="bloch-canvas" id="bloch-canvas" width="560" height="560" aria-label="Esfera de Bloch en 3D"></canvas>
+          <div class="bloch-overlay">
+            <span class="state-pill">Estado: <span id="state-label">|0⟩</span></span>
+            <span class="state-pill">Vector: <span id="state-vector">(0, 0, 1)</span></span>
+          </div>
+        </div>
       </article>
     </section>
 
@@ -213,5 +325,278 @@
       </p>
     </section>
   </main>
+  <script>
+    const canvas = document.getElementById('bloch-canvas');
+    const ctx = canvas.getContext('2d');
+    const stateLabel = document.getElementById('state-label');
+    const stateVector = document.getElementById('state-vector');
+    const gateButtons = document.querySelectorAll('.gate-chip');
+    const angleSlider = document.getElementById('angle-slider');
+    const angleInput = document.getElementById('angle-input');
+    const angleDegLabel = document.getElementById('angle-deg-label');
+    const angleRadLabel = document.getElementById('angle-rad-label');
+
+    const baseRadius = 185;
+    const center = { x: canvas.width / 2, y: canvas.height / 2 };
+    const perspective = 500;
+    const view = { yaw: 0.45, pitch: -0.25 };
+    let isDragging = false;
+    let lastPos = { x: 0, y: 0 };
+
+    let state = { x: 0, y: 0, z: 1 };
+    let target = { x: 0, y: 0, z: 1 };
+    const history = [ { ...state } ];
+    let historyMax = 48;
+
+    const normalize = (v) => {
+      const mag = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z) || 1;
+      return { x: v.x / mag, y: v.y / mag, z: v.z / mag };
+    };
+
+    const rotateX = (v, angle) => {
+      const c = Math.cos(angle);
+      const s = Math.sin(angle);
+      return { x: v.x, y: v.y * c - v.z * s, z: v.y * s + v.z * c };
+    };
+
+    const rotateY = (v, angle) => {
+      const c = Math.cos(angle);
+      const s = Math.sin(angle);
+      return { x: v.x * c + v.z * s, y: v.y, z: -v.x * s + v.z * c };
+    };
+
+    const rotateZ = (v, angle) => {
+      const c = Math.cos(angle);
+      const s = Math.sin(angle);
+      return { x: v.x * c - v.y * s, y: v.x * s + v.y * c, z: v.z };
+    };
+
+    const applyGate = (gate, angle = Math.PI / 2) => {
+      let next = { ...target };
+      if (gate === 'X') next = rotateX(next, Math.PI);
+      if (gate === 'Z') next = rotateZ(next, Math.PI);
+      if (gate === 'H') {
+        next = rotateY(next, Math.PI / 2);
+        next = rotateX(next, Math.PI);
+      }
+      if (gate === 'Rx') next = rotateX(next, angle);
+      if (gate === 'Rz') next = rotateZ(next, angle);
+      target = normalize(next);
+      history.push({ ...target });
+      if (history.length > historyMax) history.shift();
+      updateLabels();
+    };
+
+    const toDisplay = (v) => ({ x: v.x, y: v.z, z: v.y });
+
+    const project = (v) => {
+      const display = toDisplay(v);
+      const tilted = rotateX(rotateY(display, view.yaw), view.pitch);
+      const scale = perspective / (perspective + tilted.z * 200);
+      return {
+        x: center.x + tilted.x * baseRadius * scale,
+        y: center.y - tilted.y * baseRadius * scale,
+        z: tilted.z
+      };
+    };
+
+    const drawSphere = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      const sphereGradient = ctx.createRadialGradient(
+        center.x - baseRadius * 0.2,
+        center.y - baseRadius * 0.2,
+        baseRadius * 0.2,
+        center.x,
+        center.y,
+        baseRadius * 1.05
+      );
+      sphereGradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      sphereGradient.addColorStop(0.6, 'rgba(235, 235, 235, 0.9)');
+      sphereGradient.addColorStop(1, 'rgba(210, 210, 210, 0.85)');
+      ctx.fillStyle = sphereGradient;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, baseRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(140, 140, 140, 0.22)';
+      ctx.lineWidth = 1;
+      const rings = 5;
+      for (let i = 1; i <= rings; i++) {
+        const phi = (Math.PI / (rings + 1)) * i - Math.PI / 2;
+        ctx.beginPath();
+        for (let t = 0; t <= 360; t += 6) {
+          const theta = (t * Math.PI) / 180;
+          const x = Math.cos(theta) * Math.cos(phi);
+          const y = Math.sin(phi);
+          const z = Math.sin(theta) * Math.cos(phi);
+          const p = project({ x, y, z });
+          if (t === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+      }
+
+      const meridians = 6;
+      for (let i = 0; i < meridians; i++) {
+        const phi = (Math.PI * 2 / meridians) * i;
+        ctx.beginPath();
+        for (let t = 0; t <= 360; t += 6) {
+          const theta = (t * Math.PI) / 180;
+          const x = Math.cos(theta) * Math.cos(phi);
+          const y = Math.sin(theta);
+          const z = Math.cos(theta) * Math.sin(phi);
+          const p = project({ x, y, z });
+          if (t === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+      }
+
+      const axes = [
+        { x: 1, y: 0, z: 0, color: 'rgba(120, 120, 120, 0.7)', label: 'x' },
+        { x: 0, y: 1, z: 0, color: 'rgba(120, 120, 120, 0.7)', label: 'y' },
+        { x: 0, y: 0, z: 1, color: 'rgba(60, 60, 60, 0.7)', label: 'z' }
+      ];
+      axes.forEach((axis) => {
+        ctx.strokeStyle = axis.color;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        const p1 = project({ x: -axis.x, y: -axis.y, z: -axis.z });
+        const p2 = project(axis);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      });
+
+      ctx.fillStyle = 'rgba(90, 90, 90, 0.85)';
+      ctx.font = '16px "Space Grotesk", sans-serif';
+      const labelX = project({ x: 1, y: 0, z: 0 });
+      const labelY = project({ x: 0, y: 1, z: 0 });
+      ctx.fillText('x', labelX.x + 6, labelX.y + 6);
+      ctx.fillText('y', labelY.x + 6, labelY.y + 6);
+
+      ctx.fillStyle = 'rgba(60, 60, 60, 0.9)';
+      const north = project({ x: 0, y: 0, z: 1 });
+      const south = project({ x: 0, y: 0, z: -1 });
+      ctx.fillText('|0⟩', north.x - 10, north.y - 12);
+      ctx.fillText('|1⟩', south.x - 10, south.y + 18);
+      ctx.restore();
+    };
+
+    const drawPath = () => {
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(31, 138, 112, 0.65)';
+      ctx.beginPath();
+      history.forEach((point, index) => {
+        const p = project(point);
+        if (index === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    const drawStateVector = () => {
+      const p0 = project({ x: 0, y: 0, z: 0 });
+      const p1 = project(state);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(28, 50, 96, 0.9)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(28, 50, 96, 0.9)';
+      ctx.beginPath();
+      ctx.arc(p1.x, p1.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    };
+
+    const updateLabels = () => {
+      const v = normalize(target);
+      const rounded = (n) => (Math.abs(n) < 0.0001 ? 0 : Number(n.toFixed(2)));
+      stateVector.textContent = `(${rounded(v.x)}, ${rounded(v.y)}, ${rounded(v.z)})`;
+      if (v.z > 0.9) stateLabel.textContent = '|0⟩';
+      else if (v.z < -0.9) stateLabel.textContent = '|1⟩';
+      else stateLabel.textContent = '|ψ⟩';
+    };
+
+    const step = () => {
+      state.x += (target.x - state.x) * 0.08;
+      state.y += (target.y - state.y) * 0.08;
+      state.z += (target.z - state.z) * 0.08;
+      state = normalize(state);
+
+      drawSphere();
+      drawPath();
+      drawStateVector();
+      requestAnimationFrame(step);
+    };
+
+    gateButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const gate = button.dataset.gate;
+        const angle = (parseFloat(angleSlider.value) * Math.PI) / 180;
+        applyGate(gate, angle);
+      });
+    });
+
+    const updateAngleLabels = (value) => {
+      const degrees = Number(value);
+      angleDegLabel.textContent = `${degrees}°`;
+      const radians = (degrees * Math.PI) / 180;
+      const piFraction = (radians / Math.PI).toFixed(2).replace(/\.00$/, '');
+      angleRadLabel.textContent = `(${piFraction}π)`;
+    };
+
+    angleSlider.addEventListener('input', () => {
+      angleInput.value = angleSlider.value;
+      updateAngleLabels(angleSlider.value);
+    });
+
+    angleInput.addEventListener('input', () => {
+      angleSlider.value = angleInput.value || 0;
+      updateAngleLabels(angleSlider.value);
+    });
+
+    const startDrag = (event) => {
+      isDragging = true;
+      const point = event.touches ? event.touches[0] : event;
+      lastPos = { x: point.clientX, y: point.clientY };
+    };
+
+    const onDrag = (event) => {
+      if (!isDragging) return;
+      const point = event.touches ? event.touches[0] : event;
+      const dx = point.clientX - lastPos.x;
+      const dy = point.clientY - lastPos.y;
+      lastPos = { x: point.clientX, y: point.clientY };
+      view.yaw += dx * 0.01;
+      view.pitch += dy * 0.01;
+      const limit = Math.PI / 2 - 0.05;
+      view.pitch = Math.max(-limit, Math.min(limit, view.pitch));
+    };
+
+    const endDrag = () => {
+      isDragging = false;
+    };
+
+    canvas.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', onDrag);
+    window.addEventListener('mouseup', endDrag);
+    canvas.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', onDrag, { passive: true });
+    window.addEventListener('touchend', endDrag);
+
+    stateLabel.textContent = '|0⟩';
+    stateVector.textContent = '(0, 0, 1)';
+    updateLabels();
+    updateAngleLabels(angleSlider.value);
+    step();
+  </script>
 </body>
 </html>
