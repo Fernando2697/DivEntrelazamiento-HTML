@@ -86,6 +86,126 @@
       color: #2f3441;
     }
 
+    .gate-menu {
+      display: grid;
+      gap: 1rem;
+      padding: 1.2rem 1.4rem;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      box-shadow: 0 16px 32px rgba(26, 31, 43, 0.08);
+    }
+
+    .gate-menu h2 {
+      font-family: "Fraunces", serif;
+      font-size: 1.3rem;
+      color: #1b1b1b;
+    }
+
+    .gate-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    .gate-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 138, 112, 0.35);
+      background: linear-gradient(120deg, rgba(31, 138, 112, 0.14), rgba(242, 177, 52, 0.12));
+      color: var(--accent-3);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: grab;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+    }
+
+    .gate-chip:active {
+      cursor: grabbing;
+      transform: scale(0.97);
+      box-shadow: 0 8px 18px rgba(26, 31, 43, 0.2);
+    }
+
+    .gate-chip small {
+      font-weight: 500;
+      color: rgba(26, 31, 43, 0.7);
+    }
+
+    .state-panel {
+      display: grid;
+      gap: 0.4rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 16px;
+      background: rgba(31, 138, 112, 0.08);
+      border: 1px solid rgba(31, 138, 112, 0.2);
+      font-size: 0.95rem;
+      color: #1f2a2a;
+    }
+
+    .state-panel code {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      font-weight: 600;
+      color: #1b1b1b;
+    }
+
+    .histogram {
+      display: grid;
+      gap: 1rem;
+      padding: 1.4rem;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      box-shadow: 0 16px 32px rgba(26, 31, 43, 0.08);
+    }
+
+    .histogram h3 {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem;
+      color: #1b1b1b;
+    }
+
+    .histogram-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+
+    .histogram-bar {
+      display: grid;
+      gap: 0.5rem;
+      align-items: end;
+      padding: 0.8rem;
+      border-radius: 16px;
+      background: rgba(31, 138, 112, 0.08);
+      border: 1px solid rgba(31, 138, 112, 0.16);
+      min-height: 180px;
+    }
+
+    .bar-fill {
+      width: 100%;
+      border-radius: 12px 12px 8px 8px;
+      background: linear-gradient(180deg, rgba(31, 138, 112, 0.85), rgba(31, 138, 112, 0.35));
+      transition: height 0.3s ease;
+      height: 0%;
+    }
+
+    .bar-label {
+      font-weight: 600;
+      color: #1b1b1b;
+      text-align: center;
+    }
+
+    .bar-value {
+      font-size: 0.9rem;
+      text-align: center;
+      color: #2f3441;
+    }
+
     .circuit {
       display: grid;
       gap: 1.8rem;
@@ -147,6 +267,25 @@
       transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
     }
 
+    .gate-slot .gate-token {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      background: rgba(31, 138, 112, 0.16);
+      border: 1px solid rgba(31, 138, 112, 0.5);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #15483d;
+    }
+
+    .gate-slot .gate-token.cz {
+      background: rgba(242, 177, 52, 0.2);
+      border-color: rgba(242, 177, 52, 0.6);
+      color: #6a3e10;
+    }
+
     .gate-slot[data-dropzone="true"]:hover {
       border-color: var(--accent);
       background: rgba(31, 138, 112, 0.12);
@@ -188,6 +327,21 @@
           arrastre.
         </p>
       </div>
+      <div class="gate-menu" aria-label="Menu de compuertas">
+        <h2>Compuertas disponibles</h2>
+        <div class="gate-palette">
+          <div class="gate-chip" draggable="true" data-gate="X">X</div>
+          <div class="gate-chip" draggable="true" data-gate="Z">Z</div>
+          <div class="gate-chip" draggable="true" data-gate="H">H</div>
+          <div class="gate-chip" draggable="true" data-gate="Rx">Rx <small>(π/2)</small></div>
+          <div class="gate-chip" draggable="true" data-gate="Rz">Rz <small>(π/2)</small></div>
+          <div class="gate-chip" draggable="true" data-gate="CZ">CZ</div>
+        </div>
+        <div class="state-panel">
+          <div>Estado actual:</div>
+          <div><code id="state-output">|00&gt;</code></div>
+        </div>
+      </div>
       <div class="circuit" aria-label="Circuito de 2 qubits">
         <div class="wire-row" data-qubit="0">
           <div class="ket-label">|0&gt;</div>
@@ -220,8 +374,267 @@
           </div>
         </div>
       </div>
+      <div class="histogram" aria-label="Histograma de probabilidades">
+        <h3>Histograma de la base computacional</h3>
+        <div class="histogram-grid">
+          <div class="histogram-bar">
+            <div class="bar-fill" data-bar="0"></div>
+            <div class="bar-label">|00⟩</div>
+            <div class="bar-value" data-value="0">0%</div>
+          </div>
+          <div class="histogram-bar">
+            <div class="bar-fill" data-bar="1"></div>
+            <div class="bar-label">|01⟩</div>
+            <div class="bar-value" data-value="1">0%</div>
+          </div>
+          <div class="histogram-bar">
+            <div class="bar-fill" data-bar="2"></div>
+            <div class="bar-label">|10⟩</div>
+            <div class="bar-value" data-value="2">0%</div>
+          </div>
+          <div class="histogram-bar">
+            <div class="bar-fill" data-bar="3"></div>
+            <div class="bar-label">|11⟩</div>
+            <div class="bar-value" data-value="3">0%</div>
+          </div>
+        </div>
+      </div>
       <a class="backlink" href="index.html">Volver a la pagina principal</a>
     </section>
   </main>
+  <script>
+    const paletteGates = document.querySelectorAll('.gate-chip');
+    const slots = document.querySelectorAll('.gate-slot');
+    const stateOutput = document.getElementById('state-output');
+    const barFills = document.querySelectorAll('.bar-fill');
+    const barValues = document.querySelectorAll('.bar-value');
+    const totalSlots = 10;
+
+    const placedGates = Array.from({ length: 2 }, () => Array(totalSlots).fill(null));
+
+    const complex = (re, im = 0) => ({ re, im });
+    const add = (a, b) => complex(a.re + b.re, a.im + b.im);
+    const mul = (a, b) => complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+    const expi = (theta) => complex(Math.cos(theta), Math.sin(theta));
+
+    const gateX = () => [
+      [complex(0), complex(1)],
+      [complex(1), complex(0)]
+    ];
+
+    const gateZ = () => [
+      [complex(1), complex(0)],
+      [complex(0), complex(-1)]
+    ];
+
+    const gateH = () => {
+      const inv = 1 / Math.sqrt(2);
+      return [
+        [complex(inv), complex(inv)],
+        [complex(inv), complex(-inv)]
+      ];
+    };
+
+    const gateRx = (theta) => {
+      const c = Math.cos(theta / 2);
+      const s = Math.sin(theta / 2);
+      return [
+        [complex(c), complex(0, -s)],
+        [complex(0, -s), complex(c)]
+      ];
+    };
+
+    const gateRz = (theta) => {
+      return [
+        [expi(-theta / 2), complex(0)],
+        [complex(0), expi(theta / 2)]
+      ];
+    };
+
+    const gateCZ = () => [
+      [complex(1), complex(0), complex(0), complex(0)],
+      [complex(0), complex(1), complex(0), complex(0)],
+      [complex(0), complex(0), complex(1), complex(0)],
+      [complex(0), complex(0), complex(0), complex(-1)]
+    ];
+
+    const applySingleQubitGate = (state, gate, target) => {
+      const out = [complex(0), complex(0), complex(0), complex(0)];
+      for (let a = 0; a < 2; a += 1) {
+        for (let b = 0; b < 2; b += 1) {
+          const idx = (a << 1) | b;
+          if (target === 0) {
+            for (let a2 = 0; a2 < 2; a2 += 1) {
+              const outIdx = (a2 << 1) | b;
+              out[outIdx] = add(out[outIdx], mul(gate[a2][a], state[idx]));
+            }
+          } else {
+            for (let b2 = 0; b2 < 2; b2 += 1) {
+              const outIdx = (a << 1) | b2;
+              out[outIdx] = add(out[outIdx], mul(gate[b2][b], state[idx]));
+            }
+          }
+        }
+      }
+      return out;
+    };
+
+    const applyTwoQubitGate = (state, gate) => {
+      const out = [complex(0), complex(0), complex(0), complex(0)];
+      for (let i = 0; i < 4; i += 1) {
+        for (let j = 0; j < 4; j += 1) {
+          out[i] = add(out[i], mul(gate[i][j], state[j]));
+        }
+      }
+      return out;
+    };
+
+    const formatComplex = (z) => {
+      const re = Math.abs(z.re) < 1e-6 ? 0 : z.re;
+      const im = Math.abs(z.im) < 1e-6 ? 0 : z.im;
+      if (im === 0) return `${re.toFixed(3)}`;
+      if (re === 0) return `${im.toFixed(3)}i`;
+      const sign = im > 0 ? '+' : '-';
+      return `${re.toFixed(3)} ${sign} ${Math.abs(im).toFixed(3)}i`;
+    };
+
+    const renderState = (state) => {
+      const labels = ['|00⟩', '|01⟩', '|10⟩', '|11⟩'];
+      const parts = state.map((amp, idx) => `${formatComplex(amp)}${labels[idx]}`);
+      stateOutput.textContent = parts.join(' + ');
+    };
+
+    const renderHistogram = (state) => {
+      const probs = state.map((amp) => amp.re * amp.re + amp.im * amp.im);
+      probs.forEach((prob, idx) => {
+        const heightPct = Math.min(100, Math.max(0, prob * 100));
+        const fill = barFills[idx];
+        const value = barValues[idx];
+        if (fill) {
+          fill.style.height = `${heightPct}%`;
+        }
+        if (value) {
+          value.textContent = `${heightPct.toFixed(1)}%`;
+        }
+      });
+    };
+
+    const recomputeState = () => {
+      let state = [complex(1), complex(0), complex(0), complex(0)];
+      for (let slot = 0; slot < totalSlots; slot += 1) {
+        const gateTop = placedGates[0][slot];
+        const gateBottom = placedGates[1][slot];
+        const hasCZ = gateTop === 'CZ' || gateBottom === 'CZ';
+
+        if (gateTop && gateTop !== 'CZ') {
+          state = applySingleQubitGate(state, buildGate(gateTop), 0);
+        }
+        if (gateBottom && gateBottom !== 'CZ') {
+          state = applySingleQubitGate(state, buildGate(gateBottom), 1);
+        }
+        if (hasCZ) {
+          state = applyTwoQubitGate(state, gateCZ());
+        }
+      }
+      renderState(state);
+      renderHistogram(state);
+    };
+
+    const buildGate = (gateName) => {
+      const angle = Math.PI / 2;
+      switch (gateName) {
+        case 'X':
+          return gateX();
+        case 'Z':
+          return gateZ();
+        case 'H':
+          return gateH();
+        case 'Rx':
+          return gateRx(angle);
+        case 'Rz':
+          return gateRz(angle);
+        default:
+          return gateH();
+      }
+    };
+
+    const clearSlot = (slotEl) => {
+      slotEl.innerHTML = '';
+    };
+
+    const placeGateToken = (slotEl, gateName) => {
+      clearSlot(slotEl);
+      const token = document.createElement('div');
+      token.className = `gate-token${gateName === 'CZ' ? ' cz' : ''}`;
+      token.textContent = gateName;
+      slotEl.appendChild(token);
+    };
+
+    const updateGateGrid = (qubit, slot, gateName) => {
+      placedGates[qubit][slot] = gateName;
+      const slotEl = document.querySelector(`.gate-slot[data-qubit="${qubit}"][data-slot="${slot + 1}"]`);
+      if (slotEl) {
+        placeGateToken(slotEl, gateName);
+      }
+    };
+
+    const clearGateGrid = (qubit, slot) => {
+      placedGates[qubit][slot] = null;
+      const slotEl = document.querySelector(`.gate-slot[data-qubit="${qubit}"][data-slot="${slot + 1}"]`);
+      if (slotEl) {
+        clearSlot(slotEl);
+      }
+    };
+
+    paletteGates.forEach((gate) => {
+      gate.addEventListener('dragstart', (event) => {
+        event.dataTransfer.setData('text/plain', gate.dataset.gate);
+      });
+    });
+
+    slots.forEach((slotEl) => {
+      slotEl.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        slotEl.classList.add('is-drag-over');
+      });
+
+      slotEl.addEventListener('dragleave', () => {
+        slotEl.classList.remove('is-drag-over');
+      });
+
+      slotEl.addEventListener('drop', (event) => {
+        event.preventDefault();
+        slotEl.classList.remove('is-drag-over');
+        const gateName = event.dataTransfer.getData('text/plain');
+        if (!gateName) return;
+
+        const qubit = Number(slotEl.dataset.qubit);
+        const slotIndex = Number(slotEl.dataset.slot) - 1;
+
+        if (gateName === 'CZ') {
+          updateGateGrid(0, slotIndex, 'CZ');
+          updateGateGrid(1, slotIndex, 'CZ');
+        } else {
+          updateGateGrid(qubit, slotIndex, gateName);
+        }
+        recomputeState();
+      });
+
+      slotEl.addEventListener('dblclick', () => {
+        const qubit = Number(slotEl.dataset.qubit);
+        const slotIndex = Number(slotEl.dataset.slot) - 1;
+        const gateName = placedGates[qubit][slotIndex];
+        if (gateName === 'CZ') {
+          clearGateGrid(0, slotIndex);
+          clearGateGrid(1, slotIndex);
+        } else {
+          clearGateGrid(qubit, slotIndex);
+        }
+        recomputeState();
+      });
+    });
+
+    recomputeState();
+  </script>
 </body>
 </html>
