@@ -262,6 +262,106 @@
       min-width: 160px;
     }
 
+    .opt-dropdown {
+      margin-top: 1.1rem;
+      border-radius: 18px;
+      border: 1px solid rgba(31, 138, 112, 0.25);
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 16px 35px rgba(26, 31, 43, 0.08);
+      overflow: hidden;
+    }
+
+    .opt-dropdown summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 0.9rem 1.1rem;
+      font-weight: 600;
+      color: var(--accent-3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .opt-dropdown summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .opt-dropdown summary::after {
+      content: "▾";
+      font-size: 1rem;
+      transition: transform 0.2s ease;
+    }
+
+    .opt-dropdown[open] summary::after {
+      transform: rotate(-180deg);
+    }
+
+    .opt-content {
+      padding: 0 1.1rem 1.1rem;
+      display: grid;
+      gap: 0.8rem;
+      font-size: 0.92rem;
+      color: #2f3441;
+    }
+
+    .opt-inputs {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .opt-field {
+      display: grid;
+      gap: 0.3rem;
+      font-weight: 600;
+    }
+
+    .opt-field input {
+      border-radius: 12px;
+      border: 1px solid rgba(26, 31, 43, 0.18);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.95rem;
+    }
+
+    .opt-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .classify-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 0.6rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.2s ease;
+      box-shadow: 0 12px 24px rgba(31, 138, 112, 0.25);
+    }
+
+    .classify-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .classify-btn:active {
+      transform: translateY(1px);
+    }
+
+    .angle-readout {
+      font-size: 0.85rem;
+      color: #4b4f5d;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(26, 31, 43, 0.12);
+      border-radius: 12px;
+      padding: 0.45rem 0.7rem;
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
     .optimization {
       background: rgba(255, 255, 255, 0.84);
       border-radius: 30px;
@@ -334,6 +434,27 @@
             <input id="angle-input" type="number" min="-180" max="180" value="90" step="5" />
           </div>
         </div>
+
+        <details class="opt-dropdown">
+          <summary>Problema de optimizacion</summary>
+          <div class="opt-content">
+            <p>El programa embebe el dato en una coordenada de la esfera (punto amarillo). A partir de un proceso de aprendizaje con datos ya conocidos, se calculan tres angulos que definen la secuencia de rotaciones y permiten clasificar el qubit como True o False.</p>
+            <div class="opt-inputs">
+              <label class="opt-field">
+                Parametro α
+                <input id="opt-alpha" type="number" min="-1" max="1" step="0.05" value="0.35" />
+              </label>
+              <label class="opt-field">
+                Parametro β
+                <input id="opt-beta" type="number" min="-1" max="1" step="0.05" value="-0.2" />
+              </label>
+            </div>
+            <div class="opt-actions">
+              <button class="classify-btn" id="classify-btn" type="button">Clasificar</button>
+              <span class="angle-readout" id="opt-angle-readout">RzRyRzRzRyRz: (—)</span>
+            </div>
+          </div>
+        </details>
       </article>
 
       <article class="panel bloch-panel">
@@ -349,13 +470,6 @@
       </article>
     </section>
 
-    <section class="optimization">
-      <h2>Problema de Optimizacion</h2>
-      <p>
-        Debajo de la esfera se integrara un escenario de optimizacion para aplicar las rotaciones y compuertas
-        a un objetivo concreto. Esta seccion contiene el contenedor visual y las pistas de contexto.
-      </p>
-    </section>
   </main>
   <script>
     const canvas = document.getElementById('bloch-canvas');
@@ -368,6 +482,10 @@
     const angleInput = document.getElementById('angle-input');
     const angleDegLabel = document.getElementById('angle-deg-label');
     const angleRadLabel = document.getElementById('angle-rad-label');
+    const optAlphaInput = document.getElementById('opt-alpha');
+    const optBetaInput = document.getElementById('opt-beta');
+    const classifyButton = document.getElementById('classify-btn');
+    const optAngleReadout = document.getElementById('opt-angle-readout');
 
     const baseRadius = 185;
     const center = { x: canvas.width / 2, y: canvas.height / 2 };
@@ -378,6 +496,14 @@
 
     let state = { x: 0, y: 0, z: 1 };
     let target = { x: 0, y: 0, z: 1 };
+    let markerPoint = null;
+    let motionQueue = [];
+    let activeSegment = null;
+    let classifyTimeoutId = null;
+    let markerPending = false;
+    let markerSegmentsRemaining = 0;
+    let pendingSecondHalf = null;
+    let lastHistoryPoint = { x: 0, y: 0, z: 1 };
     const history = [ { ...state } ];
     let historyMax = 180;
 
@@ -385,6 +511,8 @@
       const mag = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z) || 1;
       return { x: v.x / mag, y: v.y / mag, z: v.z / mag };
     };
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
     const slerp = (a, b, t) => {
       const dot = Math.max(-1, Math.min(1, a.x * b.x + a.y * b.y + a.z * b.z));
@@ -429,14 +557,41 @@
       return rotateZ(v, angle);
     };
 
-    const addRotationPath = (axis, angle, steps = 18) => {
-      const start = { ...target };
+    const ROTATION_GROUP_MS = 1000;
+    const ROTATION_STEPS = 18;
+    const ROTATION_PAUSE_MS = 400;
+
+    const addRotationPath = (axis, angle, durationMs = ROTATION_GROUP_MS / 3, steps = ROTATION_STEPS) => {
+      const start = motionQueue.length ? { ...motionQueue[motionQueue.length - 1].point } : { ...target };
+      const stepDuration = durationMs / steps;
       for (let i = 1; i <= steps; i++) {
-        const partial = rotateAxis(start, axis, (angle * i) / steps);
-        pushHistory(partial);
+        const partial = normalize(rotateAxis(start, axis, (angle * i) / steps));
+        motionQueue.push({ point: partial, duration: stepDuration });
       }
       target = normalize(rotateAxis(start, axis, angle));
     };
+
+    const applyGateSequence = (gates, angles, durationMs = ROTATION_GROUP_MS / 3) => {
+      gates.forEach((gate, index) => {
+        const angle = angles[index] ?? 0;
+        if (gate === 'Rz') addRotationPath('z', angle, durationMs);
+        if (gate === 'Ry') addRotationPath('y', angle, durationMs);
+      });
+    };
+
+    const computeOptimizationAngles = (alpha, beta) => {
+      const safeAlpha = Number.isFinite(alpha) ? alpha : 0;
+      const safeBeta = Number.isFinite(beta) ? beta : 0;
+      const a = clamp(safeAlpha, -1, 1);
+      const b = clamp(safeBeta, -1, 1);
+      const theta = Math.acos(clamp(a, -1, 1));
+      const phi = (b + 1) * Math.PI;
+      const lambda = (a - b) * (Math.PI / 2);
+      const fixed = [Math.PI / 6, -Math.PI / 4, Math.PI / 3];
+      return [theta, phi, lambda, ...fixed];
+    };
+
+    const formatAngleDeg = (angle) => `${(angle * 180 / Math.PI).toFixed(1)}°`;
 
     const applyGate = (gate, angle = Math.PI / 2) => {
       if (gate === 'X') addRotationPath('x', Math.PI);
@@ -444,8 +599,8 @@
       if (gate === 'S') addRotationPath('z', Math.PI / 2);
       if (gate === 'P') addRotationPath('z', angle);
       if (gate === 'H') {
-        addRotationPath('z', Math.PI, 12);
-        addRotationPath('y', Math.PI / 2, 12);
+        addRotationPath('z', Math.PI, ROTATION_GROUP_MS / 3, ROTATION_STEPS);
+        addRotationPath('y', Math.PI / 2, ROTATION_GROUP_MS / 3, ROTATION_STEPS);
       }
       if (gate === 'Rx') addRotationPath('x', angle);
       if (gate === 'Rz') addRotationPath('z', angle);
@@ -594,6 +749,20 @@
       ctx.restore();
     };
 
+    const drawMarkerPoint = () => {
+      if (!markerPoint) return;
+      const p = project(markerPoint);
+      ctx.save();
+      ctx.fillStyle = 'rgba(242, 177, 52, 0.95)';
+      ctx.strokeStyle = 'rgba(122, 78, 45, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    };
+
     const updateLabels = () => {
       const v = normalize(state);
       const rounded = (n) => (Math.abs(n) < 0.0001 ? 0 : Number(n.toFixed(2)));
@@ -603,12 +772,51 @@
       else stateLabel.textContent = '|ψ⟩';
     };
 
-    const step = () => {
-      state = slerp(state, target, 0.22);
+    const step = (timestamp) => {
+      if (!activeSegment && motionQueue.length) {
+        const next = motionQueue.shift();
+        activeSegment = {
+          from: { ...state },
+          to: next.point,
+          startTime: timestamp,
+          duration: next.duration
+        };
+      }
+
+      if (activeSegment) {
+        const progress = Math.min(1, (timestamp - activeSegment.startTime) / activeSegment.duration);
+        state = slerp(activeSegment.from, activeSegment.to, progress);
+        if (progress >= 1) {
+          state = { ...activeSegment.to };
+          activeSegment = null;
+          if (markerPending) {
+            markerSegmentsRemaining = Math.max(0, markerSegmentsRemaining - 1);
+            if (markerSegmentsRemaining === 0) {
+              markerPending = false;
+              markerPoint = { ...state };
+              if (pendingSecondHalf) {
+                classifyTimeoutId = setTimeout(() => {
+                  applyGateSequence(pendingSecondHalf.gates, pendingSecondHalf.angles, ROTATION_GROUP_MS / 3);
+                  pendingSecondHalf = null;
+                  classifyTimeoutId = null;
+                }, 1000);
+              }
+            }
+          }
+        }
+      }
+      const dx = state.x - lastHistoryPoint.x;
+      const dy = state.y - lastHistoryPoint.y;
+      const dz = state.z - lastHistoryPoint.z;
+      if (Math.hypot(dx, dy, dz) > 0.01) {
+        pushHistory(state);
+        lastHistoryPoint = { ...state };
+      }
 
       drawSphere();
       drawPath();
       drawStateVector();
+      drawMarkerPoint();
       updateLabels();
       requestAnimationFrame(step);
     };
@@ -624,8 +832,19 @@
     const resetState = () => {
       state = { x: 0, y: 0, z: 1 };
       target = { x: 0, y: 0, z: 1 };
+      markerPoint = null;
+      motionQueue = [];
+      activeSegment = null;
+      if (classifyTimeoutId) {
+        clearTimeout(classifyTimeoutId);
+        classifyTimeoutId = null;
+      }
+      markerPending = false;
+      markerSegmentsRemaining = 0;
+      pendingSecondHalf = null;
       history.length = 0;
       history.push({ ...state });
+      lastHistoryPoint = { ...state };
       updateLabels();
     };
 
@@ -647,6 +866,24 @@
     angleInput.addEventListener('input', () => {
       angleSlider.value = angleInput.value || 0;
       updateAngleLabels(angleSlider.value);
+    });
+
+    classifyButton.addEventListener('click', () => {
+      resetState();
+      const alpha = parseFloat(optAlphaInput.value);
+      const beta = parseFloat(optBetaInput.value);
+      const angles = computeOptimizationAngles(alpha, beta);
+      const gateSequence = ['Rz', 'Ry', 'Rz', 'Rz', 'Ry', 'Rz'];
+      markerPoint = null;
+      applyGateSequence(gateSequence.slice(0, 3), angles.slice(0, 3), ROTATION_GROUP_MS / 3);
+      markerPending = true;
+      markerSegmentsRemaining = motionQueue.length;
+      pendingSecondHalf = {
+        gates: gateSequence.slice(3),
+        angles: angles.slice(3)
+      };
+      const readout = angles.map(formatAngleDeg).join(', ');
+      optAngleReadout.textContent = `RzRyRzRzRyRz: (${readout})`;
     });
 
     const startDrag = (event) => {
@@ -682,7 +919,7 @@
     stateVector.textContent = '(0, 0, 1)';
     updateLabels();
     updateAngleLabels(angleSlider.value);
-    step();
+    requestAnimationFrame(step);
   </script>
 </body>
 </html>
