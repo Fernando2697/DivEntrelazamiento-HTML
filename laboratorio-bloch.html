@@ -185,6 +185,33 @@
       box-shadow: 0 8px 16px rgba(26, 31, 43, 0.16);
     }
 
+    .gate-actions {
+      display: flex;
+      justify-content: center;
+      margin: 1.1rem 0 0.4rem;
+    }
+
+    .reset-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 0.55rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: rgba(23, 42, 94, 0.1);
+      color: var(--accent-3);
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.2s ease;
+    }
+
+    .reset-btn:hover {
+      background: rgba(23, 42, 94, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .reset-btn:active {
+      transform: translateY(1px);
+    }
+
     .bloch-canvas {
       width: min(460px, 92%);
       aspect-ratio: 1 / 1;
@@ -268,7 +295,7 @@
 <body>
   <div class="topbar">
     <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
-    <div class="team-name">Grupo de Computacion Cuantica en el CNyN</div>
+    <div class="team-name">Grupo de Computación Cuántica en el CNyN</div>
   </div>
   <main class="shell">
     <header class="header">
@@ -288,8 +315,13 @@
           <button class="gate-chip" data-gate="H" type="button">H</button>
           <button class="gate-chip" data-gate="X" type="button">X</button>
           <button class="gate-chip" data-gate="Z" type="button">Z</button>
+          <button class="gate-chip" data-gate="S" type="button">S</button>
+          <button class="gate-chip" data-gate="P" type="button">P</button>
           <button class="gate-chip" data-gate="Rx" type="button">Rx</button>
           <button class="gate-chip" data-gate="Rz" type="button">Rz</button>
+        </div>
+        <div class="gate-actions">
+          <button class="reset-btn" id="reset-btn" type="button">Reiniciar |0⟩</button>
         </div>
         <div class="angle-controls">
           <div class="angle-row">
@@ -331,6 +363,7 @@
     const stateLabel = document.getElementById('state-label');
     const stateVector = document.getElementById('state-vector');
     const gateButtons = document.querySelectorAll('.gate-chip');
+    const resetButton = document.getElementById('reset-btn');
     const angleSlider = document.getElementById('angle-slider');
     const angleInput = document.getElementById('angle-input');
     const angleDegLabel = document.getElementById('angle-deg-label');
@@ -346,11 +379,30 @@
     let state = { x: 0, y: 0, z: 1 };
     let target = { x: 0, y: 0, z: 1 };
     const history = [ { ...state } ];
-    let historyMax = 48;
+    let historyMax = 180;
 
     const normalize = (v) => {
       const mag = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z) || 1;
       return { x: v.x / mag, y: v.y / mag, z: v.z / mag };
+    };
+
+    const slerp = (a, b, t) => {
+      const dot = Math.max(-1, Math.min(1, a.x * b.x + a.y * b.y + a.z * b.z));
+      const angle = Math.acos(dot);
+      if (angle < 1e-5) return { ...a };
+      const sinAngle = Math.sin(angle);
+      const w1 = Math.sin((1 - t) * angle) / sinAngle;
+      const w2 = Math.sin(t * angle) / sinAngle;
+      return normalize({
+        x: a.x * w1 + b.x * w2,
+        y: a.y * w1 + b.y * w2,
+        z: a.z * w1 + b.z * w2
+      });
+    };
+
+    const pushHistory = (point) => {
+      history.push(normalize(point));
+      if (history.length > historyMax) history.shift();
     };
 
     const rotateX = (v, angle) => {
@@ -371,20 +423,32 @@
       return { x: v.x * c - v.y * s, y: v.x * s + v.y * c, z: v.z };
     };
 
-    const applyGate = (gate, angle = Math.PI / 2) => {
-      let next = { ...target };
-      if (gate === 'X') next = rotateX(next, Math.PI);
-      if (gate === 'Z') next = rotateZ(next, Math.PI);
-      if (gate === 'H') {
-        next = rotateY(next, Math.PI / 2);
-        next = rotateX(next, Math.PI);
+    const rotateAxis = (v, axis, angle) => {
+      if (axis === 'x') return rotateX(v, angle);
+      if (axis === 'y') return rotateY(v, angle);
+      return rotateZ(v, angle);
+    };
+
+    const addRotationPath = (axis, angle, steps = 18) => {
+      const start = { ...target };
+      for (let i = 1; i <= steps; i++) {
+        const partial = rotateAxis(start, axis, (angle * i) / steps);
+        pushHistory(partial);
       }
-      if (gate === 'Rx') next = rotateX(next, angle);
-      if (gate === 'Rz') next = rotateZ(next, angle);
-      target = normalize(next);
-      history.push({ ...target });
-      if (history.length > historyMax) history.shift();
-      updateLabels();
+      target = normalize(rotateAxis(start, axis, angle));
+    };
+
+    const applyGate = (gate, angle = Math.PI / 2) => {
+      if (gate === 'X') addRotationPath('x', Math.PI);
+      if (gate === 'Z') addRotationPath('z', Math.PI);
+      if (gate === 'S') addRotationPath('z', Math.PI / 2);
+      if (gate === 'P') addRotationPath('z', angle);
+      if (gate === 'H') {
+        addRotationPath('z', Math.PI, 12);
+        addRotationPath('y', Math.PI / 2, 12);
+      }
+      if (gate === 'Rx') addRotationPath('x', angle);
+      if (gate === 'Rz') addRotationPath('z', angle);
     };
 
     const toDisplay = (v) => ({ x: v.x, y: v.z, z: v.y });
@@ -490,11 +554,25 @@
       ctx.lineWidth = 2;
       ctx.strokeStyle = 'rgba(31, 138, 112, 0.65)';
       ctx.beginPath();
-      history.forEach((point, index) => {
-        const p = project(point);
-        if (index === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      });
+      let started = false;
+      const steps = 24;
+      for (let i = 0; i < history.length - 1; i++) {
+        for (let s = 0; s <= steps; s++) {
+          const point = slerp(history[i], history[i + 1], s / steps);
+          const p = project(point);
+          if (!started) {
+            ctx.moveTo(p.x, p.y);
+            started = true;
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        }
+      }
+      if (!started && history.length) {
+        const p = project(history[0]);
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x + 0.1, p.y + 0.1);
+      }
       ctx.stroke();
       ctx.restore();
     };
@@ -517,7 +595,7 @@
     };
 
     const updateLabels = () => {
-      const v = normalize(target);
+      const v = normalize(state);
       const rounded = (n) => (Math.abs(n) < 0.0001 ? 0 : Number(n.toFixed(2)));
       stateVector.textContent = `(${rounded(v.x)}, ${rounded(v.y)}, ${rounded(v.z)})`;
       if (v.z > 0.9) stateLabel.textContent = '|0⟩';
@@ -526,14 +604,12 @@
     };
 
     const step = () => {
-      state.x += (target.x - state.x) * 0.08;
-      state.y += (target.y - state.y) * 0.08;
-      state.z += (target.z - state.z) * 0.08;
-      state = normalize(state);
+      state = slerp(state, target, 0.22);
 
       drawSphere();
       drawPath();
       drawStateVector();
+      updateLabels();
       requestAnimationFrame(step);
     };
 
@@ -544,6 +620,16 @@
         applyGate(gate, angle);
       });
     });
+
+    const resetState = () => {
+      state = { x: 0, y: 0, z: 1 };
+      target = { x: 0, y: 0, z: 1 };
+      history.length = 0;
+      history.push({ ...state });
+      updateLabels();
+    };
+
+    resetButton.addEventListener('click', resetState);
 
     const updateAngleLabels = (value) => {
       const degrees = Number(value);
