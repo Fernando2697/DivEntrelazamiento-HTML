@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interferencia Cuántica</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    :root {
+      --ink: #1a1f2b;
+      --paper: #f7f3ee;
+      --accent: #1f8a70;
+      --accent-2: #f2b134;
+      --accent-3: #7a4e2d;
+      --shadow: rgba(26, 31, 43, 0.12);
+      --orange: #F97316;
+      --blue: #3B82F6;
+      --result: #8b5cf6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(31, 138, 112, 0.14), transparent 45%),
+        radial-gradient(circle at 82% 10%, rgba(242, 177, 52, 0.18), transparent 42%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 6vw 0;
+    }
+
+    .topbar a {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .topbar img {
+      width: 56px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+      transition: transform 0.2s ease, filter 0.2s ease;
+      cursor: pointer;
+    }
+
+    .topbar a:hover img {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.18));
+    }
+
+    .topbar .team-name {
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+      color: #1b1b1b;
+    }
+
+    .shell {
+      min-height: 100vh;
+      padding: 5.5rem 6vw 5rem;
+      display: grid;
+      gap: 2.5rem;
+    }
+
+    .header {
+      max-width: 900px;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .header h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.3rem, 3.6vw, 3.6rem);
+    }
+
+    .header p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #2f3441;
+    }
+
+    .stage {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      padding: 2rem;
+      display: grid;
+      gap: 1.6rem;
+      box-shadow: 0 22px 50px var(--shadow);
+      border-radius: 28px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 260px;
+      display: block;
+      background: #f3efe8;
+      border: 1px solid rgba(26, 31, 43, 0.08);
+    }
+
+    .controls {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .label {
+      color: #5a5f6d;
+      font-size: 0.95rem;
+    }
+
+    .phase-value {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--result);
+    }
+
+    .interference-tag {
+      font-weight: 600;
+      color: var(--result);
+      letter-spacing: 0.3px;
+    }
+
+    .dynamic-text {
+      color: #2f3441;
+      font-size: 0.98rem;
+      line-height: 1.6;
+      min-height: 3.2rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1.4rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+      color: #5a5f6d;
+    }
+
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 0.5rem;
+      background: currentColor;
+    }
+
+    .legend .orange { color: var(--orange); }
+    .legend .blue { color: var(--blue); }
+    .legend .result { color: var(--result); }
+
+    .text-block {
+      display: grid;
+      gap: 1rem;
+      color: #2f3441;
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    .timestamp {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.3px;
+    }
+
+    .text-block h2 {
+      font-family: "Fraunces", serif;
+      color: var(--ink);
+      font-size: 1.6rem;
+    }
+
+    .backlink {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--accent-3);
+      font-weight: 600;
+      margin-top: 0.4rem;
+    }
+
+    .backlink::before {
+      content: "←";
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="index.html" aria-label="Volver a la pagina principal">
+      <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    </a>
+    <div class="team-name">Grupo de Computación Cuántica en el CNyN</div>
+  </div>
+  <main class="shell">
+    <header class="header">
+      <h1>Interferencia Cuántica</h1>
+      <p>
+        Ajusta la fase relativa para ver cómo las amplitudes se refuerzan o se cancelan. La onda morada representa la
+        suma de las dos ondas base.
+      </p>
+      <a class="backlink" href="index.html">Volver a la pagina principal</a>
+    </header>
+
+    <section class="stage">
+      <canvas id="waveCanvas" aria-label="Ondas en interferencia"></canvas>
+      <div class="legend">
+        <span class="orange">Onda naranja</span>
+        <span class="blue">Onda azul</span>
+        <span class="result">Suma resultante</span>
+      </div>
+      <div class="controls">
+        <div class="row">
+          <div class="label">Fase relativa</div>
+          <div class="phase-value" id="phaseValue">0°</div>
+        </div>
+        <input type="range" id="phaseSlider" min="0" max="360" value="0" />
+        <div class="row">
+          <div class="interference-tag" id="interferenceLabel">Interferencia constructiva</div>
+          <div class="label">0°</div>
+        </div>
+        <p class="dynamic-text" id="dynamicText"></p>
+      </div>
+    </section>
+
+    <section class="stage text-block">
+      <div class="timestamp">10:15 PM</div>
+      <h2>¿Qué es la interferencia cuántica?</h2>
+      <p>
+        Imagina que lanzas una piedra a un estanque. Se forma una onda circular que se expande. Ahora lanza dos piedras
+        al mismo tiempo en puntos distintos: las dos ondas se encuentran y algo interesante ocurre. En algunos lugares
+        las crestas coinciden y el agua sube más alto que con cualquiera de las dos ondas por separado — se refuerzan.
+        En otros lugares una cresta choca con un valle y se cancelan mutuamente — el agua queda plana. A esto se le
+        llama interferencia.
+      </p>
+      <p>
+        Las partículas cuánticas se comportan igual. Un qubit en superposición no es solo "ambas cosas a la vez"; es más
+        bien una onda de probabilidades. Esa onda tiene crestas y valles, y pueden sumarse o cancelarse dependiendo de
+        cómo se combinen.
+      </p>
+      <p>
+        En computación cuántica aprovechamos esto de forma deliberada. Un algoritmo cuántico está diseñado para que los
+        caminos que llevan a la respuesta incorrecta se cancelen entre sí, y los caminos que llevan a la respuesta
+        correcta se refuercen. Al final de la computación, cuando medimos el sistema, la respuesta correcta tiene una
+        probabilidad muy alta de aparecer — no porque la hayamos buscado una por una, sino porque la interferencia la hizo
+        emerger sola.
+      </p>
+      <p>
+        Es como si, en lugar de probar todas las puertas de un laberinto hasta encontrar la salida, pudieras enviar una
+        onda por todo el laberinto a la vez: los caminos sin salida se anulan y la ola llega con toda su fuerza justo por
+        la ruta correcta.
+      </p>
+      <p>
+        Junto con la superposición y el entrelazamiento, la interferencia es uno de los tres pilares sobre los que
+        descansa toda la ventaja de la computación cuántica.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("waveCanvas");
+    const ctx = canvas.getContext("2d");
+    const phaseSlider = document.getElementById("phaseSlider");
+    const phaseValue = document.getElementById("phaseValue");
+    const interferenceLabel = document.getElementById("interferenceLabel");
+    const dynamicText = document.getElementById("dynamicText");
+
+    let width = 0;
+    let height = 0;
+    let time = 0;
+
+    const orange = "#F97316";
+    const blue = "#3B82F6";
+    const result = "#c4b5fd";
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      width = canvas.clientWidth * ratio;
+      height = canvas.clientHeight * ratio;
+      canvas.width = width;
+      canvas.height = height;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(ratio, ratio);
+    }
+
+    function getPhase() {
+      return Number(phaseSlider.value);
+    }
+
+    function updateLabels() {
+      const phase = getPhase();
+      const normalized = (phase + 360) % 360;
+      phaseValue.textContent = `${normalized}°`;
+
+      const nearZero = normalized <= 20 || normalized >= 340;
+      const nearPi = Math.abs(normalized - 180) <= 20;
+
+      if (nearZero) {
+        interferenceLabel.textContent = "Interferencia constructiva";
+        dynamicText.textContent =
+          `Con una fase de ${normalized}°, las ondas están casi alineadas. Sus crestas se suman y la onda resultante es grande.`;
+      } else if (nearPi) {
+        interferenceLabel.textContent = "Interferencia destructiva";
+        dynamicText.textContent =
+          `Con una fase de ${normalized}°, una cresta coincide con un valle. Las ondas se cancelan y la resultante se acerca a cero.`;
+      } else {
+        interferenceLabel.textContent = "Interferencia parcial";
+        dynamicText.textContent =
+          `Con una fase de ${normalized}°, las ondas están parcialmente desfasadas. La suma resultante es intermedia.`;
+      }
+    }
+
+    function drawWave(color, amplitude, phase) {
+      const mid = canvas.clientHeight / 2;
+      const scaleX = canvas.clientWidth / 120;
+      ctx.beginPath();
+      for (let x = 0; x <= 120; x += 1) {
+        const y = mid + Math.sin((x / 120) * Math.PI * 4 + time + phase) * amplitude;
+        if (x === 0) {
+          ctx.moveTo(x * scaleX, y);
+        } else {
+          ctx.lineTo(x * scaleX, y);
+        }
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function draw() {
+      const phaseDeg = getPhase();
+      const phaseRad = (phaseDeg * Math.PI) / 180;
+      const amplitude = canvas.clientHeight / 5.2;
+      const mid = canvas.clientHeight / 2;
+      const scaleX = canvas.clientWidth / 120;
+
+      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+
+      drawWave(orange, amplitude, 0);
+      drawWave(blue, amplitude, phaseRad);
+
+      ctx.beginPath();
+      for (let x = 0; x <= 120; x += 1) {
+        const base = (x / 120) * Math.PI * 4 + time;
+        const sum = Math.sin(base) + Math.sin(base + phaseRad);
+        const y = mid + sum * (amplitude * 0.6);
+        if (x === 0) {
+          ctx.moveTo(x * scaleX, y);
+        } else {
+          ctx.lineTo(x * scaleX, y);
+        }
+      }
+      ctx.strokeStyle = result;
+      ctx.lineWidth = 2.4;
+      ctx.stroke();
+
+      time += 0.02;
+      requestAnimationFrame(draw);
+    }
+
+    phaseSlider.addEventListener("input", updateLabels);
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+    updateLabels();
+    draw();
+  </script>
+</body>
+</html>

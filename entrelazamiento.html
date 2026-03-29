@@ -39,11 +39,23 @@
       padding: 1.5rem 6vw 0;
     }
 
+    .topbar a {
+      display: inline-flex;
+      align-items: center;
+    }
+
     .topbar img {
       width: 56px;
       height: auto;
       display: block;
       filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+      transition: transform 0.2s ease, filter 0.2s ease;
+      cursor: pointer;
+    }
+
+    .topbar a:hover img {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.18));
     }
 
     .topbar .team-name {
@@ -259,15 +271,48 @@
 </head>
 <body>
   <div class="topbar">
-    <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    <a href="index.html" aria-label="Volver a la pagina principal">
+      <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    </a>
     <div class="team-name">Grupo de Computación Cuántica en el CNyN</div>
   </div>
   <main class="shell">
     <header class="header">
       <h1>Entrelazamiento y Estados de Bell</h1>
+      <p>¿Qué es el entrelazamiento cuántico?</p>
       <p>
-        Selecciona un estado de Bell y observa como responden dos qubits representados por pelotas. En |00> + |11>
-        cambian coordinadamente; en |01> + |10> lo hacen de forma antisimetrica.
+        Regresa a nuestra pelota naranja y azul. Ahora imagina que tienes dos pelotas y las preparas juntas de una forma
+        especial, de modo que quedan vinculadas: el color de una determina instantáneamente el color de la otra. Si una
+        resulta ser naranja, la otra también podría ser naranja, o podría ser azul — depende exactamente de cómo se
+        preparó el par. Hasta aquí, nada extraño; podría parecer que alguien simplemente las empacó así desde el
+        principio.
+      </p>
+      <p>
+        Pero el entrelazamiento cuántico va más lejos. Recuerda que antes de ser observadas, las pelotas no tienen color
+        definido; están en superposición. Lo extraordinario es que cuando miras una pelota y colapsa a un color, la otra
+        pelota —sin importar qué tan lejos esté— colapsa instantáneamente al color que le corresponde según cómo estaban
+        entrelazadas. No hay mensaje que viaje entre ellas. No hay señal. Simplemente ocurre.
+      </p>
+      <p>
+        A Einstein le perturbó tanto esta idea que la llamó "acción fantasmal a distancia", convencido de que algo
+        estaba mal en la teoría. Décadas después, los experimentos le dieron la razón a la mecánica cuántica: el
+        entrelazamiento es real.
+      </p>
+      <p><strong>Los estados de Bell: las cuatro formas de entrelazar dos pelotas</strong></p>
+      <p>
+        Los físicos identificaron que hay exactamente cuatro maneras distintas de entrelazar un par de qubits de forma
+        máxima. Se llaman estados de Bell, en honor al físico John Stewart Bell. Con nuestras pelotas se ven así:
+      </p>
+      <p>|00>: ambas pelotas siempre aparecen naranja juntas.</p>
+      <p>|11>: ambas pelotas siempre aparecen azul juntas.</p>
+      <p>|01> + |10>: las pelotas siempre aparecen de colores opuestos, una naranja y la otra azul.</p>
+      <p>
+        |01> − |10>: las pelotas también aparecen de colores opuestos, pero con una diferencia sutil en la fase — algo
+        que no se ve en el color, pero que tiene consecuencias reales en los cálculos cuánticos.
+      </p>
+      <p>
+        En el ejemplo interactivo de abajo puedes explorar dos de estas combinaciones: las que muestran correlación
+        perfecta (sincronizadas) y anticorrelación perfecta (opuestas).
       </p>
       <a class="backlink" href="index.html">Volver a la pagina principal</a>
     </header>
@@ -300,6 +345,30 @@
           <div class="label">Qubit B</div>
         </div>
       </div>
+    </section>
+
+    <section class="stage">
+      <p>
+        Es importante aclarar algo sobre lo que el entrelazamiento no puede hacer: no permite que ninguna de las dos
+        personas controle o elija el resultado que obtiene. Al medir tu pelota, obtienes un color aleatorio; no puedes
+        decidir qué color aparece. Por eso, aunque los resultados están perfectamente correlacionados, esa correlación
+        no puede explotarse para transmitir un mensaje Quantum Zeitgeist. No hay forma de codificar información en el
+        resultado, porque el resultado no está bajo tu control.
+      </p>
+      <p>
+        Lo que sí existe es la comunicación cuántica: protocolos como la teleportación cuántica o la distribución
+        cuántica de claves (QKD) usan el entrelazamiento como recurso. Pero hay un detalle crucial: en estos protocolos,
+        el par entrelazado actúa como recurso, no como canal directo; siempre se necesita además un canal clásico
+        convencional para completar el proceso Quantum Zeitgeist. En la teleportación cuántica, por ejemplo, el estado
+        cuántico de un qubit se transfiere de Alice a Bob, pero Alice destruye su copia local en el proceso — la
+        información no se duplica, se desplaza. Y para que Bob pueda reconstruirla, Alice tiene que enviarle dos bits
+        clásicos por un canal ordinario.
+      </p>
+      <p>
+        En resumen: el entrelazamiento no viola ningún límite de velocidad, no permite comunicación instantánea de
+        mensajes, pero sí es un recurso real y poderoso para protocolos de comunicación cuántica seguros y para
+        distribuir cómputo entre procesadores cuánticos distantes.
+      </p>
     </section>
   </main>
 

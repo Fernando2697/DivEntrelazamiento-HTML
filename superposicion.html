@@ -39,11 +39,23 @@
       padding: 1.5rem 6vw 0;
     }
 
+    .topbar a {
+      display: inline-flex;
+      align-items: center;
+    }
+
     .topbar img {
       width: 56px;
       height: auto;
       display: block;
       filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+      transition: transform 0.2s ease, filter 0.2s ease;
+      cursor: pointer;
+    }
+
+    .topbar a:hover img {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.18));
     }
 
     .topbar .team-name {
@@ -109,6 +121,7 @@
       border-radius: 50%;
       margin: 0 auto;
       box-shadow: inset 0 -12px 24px rgba(0, 0, 0, 0.12);
+      transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease;
     }
 
     .ball.zero {
@@ -141,6 +154,88 @@
       color: var(--accent-3);
     }
 
+    .rods {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .rod {
+      border: 1px solid rgba(26, 31, 43, 0.18);
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem 0.35rem 0.55rem;
+      font-weight: 600;
+      background: #fff;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .rod::before {
+      content: "";
+      width: 10px;
+      height: 38px;
+      border-radius: 999px;
+      background: var(--rod-color);
+      box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.16);
+      display: inline-block;
+    }
+
+    .rod:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(26, 31, 43, 0.12);
+    }
+
+    .rod.blue {
+      --rod-color: #2f8fdb;
+    }
+
+    .rod.orange {
+      --rod-color: #ff7a59;
+    }
+
+    .result {
+      min-height: 1.1rem;
+      font-size: 0.9rem;
+      color: #2f3441;
+    }
+
+    .reset-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
+    .reset {
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.6rem 1.4rem;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(31, 138, 112, 0.22);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .reset:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 24px rgba(31, 138, 112, 0.26);
+    }
+
+    .ball.vanish {
+      opacity: 0;
+      transform: scale(0.6);
+      filter: blur(1px);
+    }
+
+    .ball-card.removed .label {
+      color: rgba(122, 78, 45, 0.6);
+    }
+
     .backlink {
       display: inline-flex;
       align-items: center;
@@ -158,35 +253,146 @@
 </head>
 <body>
   <div class="topbar">
-    <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    <a href="index.html" aria-label="Volver a la pagina principal">
+      <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    </a>
     <div class="team-name">Grupo de Computación Cuántica en el CNyN</div>
   </div>
   <main class="shell">
     <header class="header">
       <h1>Superposicion en un Sistema Cuantico</h1>
+      <p>¿Qué es la superposición cuántica?</p>
       <p>
-        La superposicion permite que un qubit combine estados de la base computacional. Estas tres pelotas representan
-        los estados |0>, |1> y una superposicion que alterna entre ambos colores.
+        En el mundo que conocemos, las cosas tienen un estado definido: una luz está encendida o apagada, una moneda es
+        cara o cruz. Pero en el mundo cuántico, las partículas pueden estar en dos estados al mismo tiempo. A eso le
+        llamamos superposición.
+      </p>
+      <p>
+        Imagina una pelota que puede ser naranja o azul. En la vida cotidiana, si cierras los ojos y alguien te da una
+        pelota, esa pelota ya tiene un color: tú simplemente aún no lo sabes. Pero una partícula cuántica no funciona
+        así. Antes de medirla, la pelota realmente no es naranja ni azul: es ambas cosas a la vez, mezcladas en una
+        combinación de posibilidades.
+      </p>
+      <p>
+        En el momento en que abres los ojos y miras la pelota, algo extraordinario sucede: la superposición se rompe y
+        la pelota "elige" un color. Ese instante en que observamos o medimos el sistema cuántico se llama colapso de la
+        función de onda.
+      </p>
+      <p>
+        Lo más sorprendente es que esto no es una limitación de nuestros instrumentos ni de nuestra ignorancia. La
+        naturaleza misma no decide el color hasta que algo interactúa con la pelota. La indeterminación es real.
+      </p>
+      <p>
+        En computación cuántica, aprovechamos esta propiedad: mientras un bit clásico es 0 o 1, un qubit puede ser 0 y 1
+        simultáneamente gracias a la superposición. Esto permite que una computadora cuántica explore muchas
+        posibilidades al mismo tiempo, en lugar de probarlas una por una.
+      </p>
+      <p>
+        Usa las varas medidoras debajo de cada pelota para ver la diferencia entre un estado fijo y uno superpuesto. En
+        las pelotas de color fijo, si la vara coincide con el color, no pasa nada; si no coincide, la pelota desaparece.
+        En la superpuesta, la pelota adopta el color de la vara con la que la mides.
       </p>
       <a class="backlink" href="index.html">Volver a la pagina principal</a>
     </header>
 
     <section class="stage">
       <div class="balls">
-        <div class="ball-card">
+        <div class="ball-card" data-ball="zero" data-fixed="zero">
           <div class="ball zero"></div>
           <div class="label">Estado |0></div>
+          <div class="rods">
+            <button class="rod blue" data-measure="zero" type="button">Vara azul</button>
+            <button class="rod orange" data-measure="one" type="button">Vara naranja</button>
+          </div>
+          <div class="result" aria-live="polite"></div>
         </div>
-        <div class="ball-card">
+        <div class="ball-card" data-ball="one" data-fixed="one">
           <div class="ball one"></div>
           <div class="label">Estado |1></div>
+          <div class="rods">
+            <button class="rod blue" data-measure="zero" type="button">Vara azul</button>
+            <button class="rod orange" data-measure="one" type="button">Vara naranja</button>
+          </div>
+          <div class="result" aria-live="polite"></div>
         </div>
-        <div class="ball-card">
+        <div class="ball-card" data-ball="super" data-fixed="super">
           <div class="ball superposicion"></div>
           <div class="label">Superposicion |0> + |1></div>
+          <div class="rods">
+            <button class="rod blue" data-measure="zero" type="button">Vara azul</button>
+            <button class="rod orange" data-measure="one" type="button">Vara naranja</button>
+          </div>
+          <div class="result" aria-live="polite"></div>
         </div>
+      </div>
+      <div class="reset-wrap">
+        <button class="reset" type="button">Reiniciar experimento</button>
       </div>
     </section>
   </main>
+  <script>
+    const cards = document.querySelectorAll(".ball-card");
+    const resetButton = document.querySelector(".reset");
+
+    cards.forEach((card) => {
+      const ball = card.querySelector(".ball");
+      const label = card.querySelector(".label");
+      const result = card.querySelector(".result");
+      const rods = card.querySelectorAll(".rod");
+      const fixed = card.dataset.fixed;
+
+      rods.forEach((rod) => {
+        rod.addEventListener("click", () => {
+          const measure = rod.dataset.measure;
+
+          if (fixed === "super") {
+            ball.classList.remove("superposicion", "zero", "one");
+            ball.classList.add(measure === "zero" ? "zero" : "one");
+            label.textContent = measure === "zero" ? "Colapso a |0>" : "Colapso a |1>";
+            result.textContent = "La superposicion colapsa al color de la vara.";
+            return;
+          }
+
+          if (card.classList.contains("removed")) {
+            return;
+          }
+
+          if (fixed === measure) {
+            result.textContent = "La medicion coincide, la pelota permanece igual.";
+            return;
+          }
+
+          ball.classList.add("vanish");
+          card.classList.add("removed");
+          result.textContent = "La medicion no coincide: la pelota desaparece.";
+        });
+      });
+    });
+
+    resetButton.addEventListener("click", () => {
+      cards.forEach((card) => {
+        const ball = card.querySelector(".ball");
+        const label = card.querySelector(".label");
+        const result = card.querySelector(".result");
+        const fixed = card.dataset.fixed;
+
+        card.classList.remove("removed");
+        ball.classList.remove("vanish", "zero", "one", "superposicion");
+
+        if (fixed === "super") {
+          ball.classList.add("superposicion");
+          label.textContent = "Superposicion |0> + |1>";
+        } else if (fixed === "zero") {
+          ball.classList.add("zero");
+          label.textContent = "Estado |0>";
+        } else {
+          ball.classList.add("one");
+          label.textContent = "Estado |1>";
+        }
+
+        result.textContent = "";
+      });
+    });
+  </script>
 </body>
 </html>

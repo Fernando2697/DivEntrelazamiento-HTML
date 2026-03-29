@@ -42,11 +42,23 @@
       padding: 1.5rem 6vw 0;
     }
 
+    .topbar a {
+      display: inline-flex;
+      align-items: center;
+    }
+
     .topbar img {
       width: 56px;
       height: auto;
       display: block;
       filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
+      transition: transform 0.2s ease, filter 0.2s ease;
+      cursor: pointer;
+    }
+
+    .topbar a:hover img {
+      transform: translateY(-2px);
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.18));
     }
 
     .topbar .team-name {
@@ -380,7 +392,9 @@
 </head>
 <body>
   <div class="topbar">
-    <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    <a href="index.html" aria-label="Volver a la pagina principal">
+      <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    </a>
     <div class="team-name">Grupo de Computación Cuántica en el CNyN</div>
   </div>
   <main class="shell">
