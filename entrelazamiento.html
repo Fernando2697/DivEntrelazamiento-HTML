@@ -39,29 +39,33 @@
       padding: 1.5rem 6vw 0;
     }
 
-    .topbar a {
+    .logo-button {
       display: inline-flex;
       align-items: center;
+      padding: 0.45rem 0.7rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(31, 138, 112, 0.22);
+      box-shadow: 0 12px 24px rgba(26, 31, 43, 0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     }
 
-    .topbar img {
-      width: 56px;
+    .logo-button img {
+      width: clamp(180px, 24vw, 260px);
       height: auto;
       display: block;
-      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12));
-      transition: transform 0.2s ease, filter 0.2s ease;
-      cursor: pointer;
     }
 
-    .topbar a:hover img {
+    .logo-button:hover {
       transform: translateY(-2px);
-      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.18));
+      box-shadow: 0 18px 32px rgba(26, 31, 43, 0.2);
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(31, 138, 112, 0.5);
     }
 
-    .topbar .team-name {
-      font-family: "Fraunces", serif;
-      font-size: 1.1rem;
-      color: #1b1b1b;
+    .logo-button:focus-visible {
+      outline: 3px solid rgba(31, 138, 112, 0.35);
+      outline-offset: 3px;
     }
 
     .shell {
@@ -271,10 +275,9 @@
 </head>
 <body>
   <div class="topbar">
-    <a href="index.html" aria-label="Volver a la pagina principal">
-      <img src="Escudo-UNAM-escalable.svg" alt="Escudo UNAM" />
+    <a class="logo-button" href="index.html" aria-label="Volver a la pagina principal">
+      <img src="LogoGCCCNyN.jpg" alt="Logo GCCC NyN" />
     </a>
-    <div class="team-name">Grupo de Computación Cuántica en el CNyN</div>
   </div>
   <main class="shell">
     <header class="header">
