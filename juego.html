@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>El Constructor de Oráculo</title>
+  <style>
+    :root {
+      --ink: #1a1f2b;
+      --paper: #f7f3ee;
+      --mist: #e9e2d8;
+      --accent: #1f8a70;
+      --accent-2: #f2b134;
+      --accent-3: #7a4e2d;
+      --shadow: rgba(26, 31, 43, 0.12);
+      --glow: rgba(31, 138, 112, 0.18);
+      --target: rgba(90, 90, 90, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(31, 138, 112, 0.15), transparent 45%),
+        radial-gradient(circle at 82% 12%, rgba(242, 177, 52, 0.2), transparent 40%),
+        radial-gradient(circle at 30% 85%, rgba(26, 31, 43, 0.08), transparent 55%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 100%);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 6vw 0;
+    }
+
+    .logo-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.7rem;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid rgba(31, 138, 112, 0.22);
+      box-shadow: 0 12px 24px rgba(26, 31, 43, 0.16);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .logo-button img {
+      width: clamp(260px, 36vw, 420px);
+      height: auto;
+      display: block;
+    }
+
+    .logo-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(26, 31, 43, 0.2);
+      background: transparent;
+      border-color: rgba(31, 138, 112, 0.5);
+    }
+
+    .logo-button:focus-visible {
+      outline: 3px solid rgba(31, 138, 112, 0.35);
+      outline-offset: 3px;
+    }
+
+    .top-links {
+      margin-left: auto;
+      display: flex;
+      gap: 0.9rem;
+      font-weight: 600;
+    }
+
+    .top-links a {
+      text-decoration: none;
+      color: var(--accent-3);
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(122, 78, 45, 0.2);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 4.5rem 6vw 5rem;
+    }
+
+    .game {
+      width: min(1100px, 100%);
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 32px;
+      padding: 2.6rem;
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      box-shadow: 0 24px 55px var(--shadow);
+      backdrop-filter: blur(12px);
+      display: grid;
+      gap: 2rem;
+    }
+
+    .game h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.2rem, 3.3vw, 3.4rem);
+    }
+
+    .level-header {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .level-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .level-controls select {
+      padding: 0.5rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid rgba(31, 138, 112, 0.35);
+      background: rgba(255, 255, 255, 0.8);
+      font-weight: 600;
+    }
+
+    .level-badge {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(31, 138, 112, 0.12);
+      border: 1px solid rgba(31, 138, 112, 0.25);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1b1b1b;
+    }
+
+    .game-layout {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: minmax(200px, 240px) minmax(320px, 1fr);
+      align-items: start;
+    }
+
+    .left-rail {
+      align-self: start;
+    }
+
+    .right-stack {
+      display: grid;
+      gap: 1.6rem;
+      min-width: 0;
+    }
+
+
+    .panel {
+      display: grid;
+      gap: 1.2rem;
+      padding: 1.4rem 1.5rem;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      box-shadow: 0 16px 32px rgba(26, 31, 43, 0.08);
+    }
+
+    .panel h2 {
+      font-family: "Fraunces", serif;
+      font-size: 1.4rem;
+    }
+
+    .panel p {
+      color: #2f3441;
+      line-height: 1.65;
+    }
+
+    .hint {
+      padding: 0.6rem 0.9rem;
+      border-radius: 14px;
+      background: rgba(242, 177, 52, 0.15);
+      border: 1px dashed rgba(242, 177, 52, 0.5);
+      font-size: 0.95rem;
+    }
+
+    .objective {
+      padding: 0.6rem 0.9rem;
+      border-radius: 14px;
+      background: rgba(31, 138, 112, 0.12);
+      border: 1px dashed rgba(31, 138, 112, 0.4);
+      font-size: 0.95rem;
+    }
+
+    .gate-menu {
+      display: grid;
+      gap: 1rem;
+      padding: 1.1rem 1.3rem;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      box-shadow: 0 16px 32px rgba(26, 31, 43, 0.08);
+    }
+
+    .gate-menu h3 {
+      font-family: "Fraunces", serif;
+      font-size: 1.15rem;
+      color: #1b1b1b;
+    }
+
+    .gate-palette {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .gate-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 138, 112, 0.35);
+      background: linear-gradient(120deg, rgba(31, 138, 112, 0.14), rgba(242, 177, 52, 0.12));
+      color: var(--accent-3);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: grab;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+      width: 100%;
+    }
+
+    .gate-chip:active {
+      cursor: grabbing;
+      transform: scale(0.97);
+      box-shadow: 0 8px 18px rgba(26, 31, 43, 0.2);
+    }
+
+    .state-panel {
+      display: grid;
+      gap: 0.4rem;
+      padding: 0.9rem 1.1rem;
+      border-radius: 16px;
+      background: rgba(31, 138, 112, 0.08);
+      border: 1px solid rgba(31, 138, 112, 0.2);
+      font-size: 0.95rem;
+      color: #1f2a2a;
+    }
+
+    .state-panel span {
+      word-break: break-word;
+    }
+
+    .state-panel strong {
+      color: #1b1b1b;
+    }
+
+    .circuit {
+      display: grid;
+      gap: 1.6rem;
+      padding: 1.3rem 1.2rem 1.5rem;
+      border-radius: 24px;
+      background: linear-gradient(120deg, rgba(31, 138, 112, 0.08), rgba(242, 177, 52, 0.08));
+      border: 1px solid rgba(26, 31, 43, 0.08);
+      min-width: 0;
+    }
+
+    .wire-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .ket-label {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--accent-3);
+      background: rgba(122, 78, 45, 0.08);
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(122, 78, 45, 0.2);
+      min-width: 64px;
+      text-align: center;
+    }
+
+    .gate-track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(10, minmax(28px, 1fr));
+      gap: 0.5rem;
+      padding: 0.5rem 0.2rem;
+    }
+
+    .gate-track::before {
+      content: "";
+      position: absolute;
+      left: 0.2rem;
+      right: 0.2rem;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(26, 31, 43, 0.2), rgba(26, 31, 43, 0.4), rgba(26, 31, 43, 0.2));
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+
+    .gate-slot {
+      position: relative;
+      z-index: 1;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid rgba(31, 138, 112, 0.45);
+      background: rgba(255, 255, 255, 0.7);
+      display: grid;
+      place-items: center;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .gate-slot.locked {
+      background: rgba(122, 78, 45, 0.12);
+      border-color: rgba(122, 78, 45, 0.45);
+      cursor: not-allowed;
+    }
+
+    .gate-slot .gate-token {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      background: rgba(31, 138, 112, 0.16);
+      border: 1px solid rgba(31, 138, 112, 0.5);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #15483d;
+    }
+
+    .gate-slot .gate-token.cz {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #f2b134;
+      border: 2px solid rgba(106, 62, 16, 0.8);
+      color: transparent;
+    }
+
+    .gate-slot.has-cz::after,
+    .gate-slot.has-cnot::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      background: rgba(106, 62, 16, 0.9);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 0;
+    }
+
+    .gate-slot.has-cz[data-qubit="0"]::after,
+    .gate-slot.has-cnot[data-qubit="0"]::after {
+      top: 50%;
+      height: 64px;
+    }
+
+    .gate-slot.has-cz[data-qubit="1"]::after,
+    .gate-slot.has-cnot[data-qubit="1"]::after {
+      bottom: 50%;
+      height: 64px;
+    }
+
+    .gate-slot .gate-token.cnot-control {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #1f2a2a;
+      border: 2px solid #1f2a2a;
+      color: transparent;
+    }
+
+    .gate-slot .gate-token.cnot-target {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #1f2a2a;
+      position: relative;
+      color: transparent;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .gate-slot .gate-token.cnot-target::before,
+    .gate-slot .gate-token.cnot-target::after {
+      content: "";
+      position: absolute;
+      background: #1f2a2a;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .gate-slot .gate-token.cnot-target::before {
+      width: 10px;
+      height: 2px;
+    }
+
+    .gate-slot .gate-token.cnot-target::after {
+      width: 2px;
+      height: 10px;
+    }
+
+    .gate-slot[data-dropzone="true"]:hover {
+      border-color: var(--accent);
+      background: rgba(31, 138, 112, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .gate-slot.is-drag-over {
+      border-color: var(--accent-2);
+      background: rgba(242, 177, 52, 0.18);
+    }
+
+    .histogram {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .histogram-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(90px, 1fr));
+      gap: 1rem;
+    }
+
+    .histogram-bar {
+      display: grid;
+      gap: 0.5rem;
+      align-items: end;
+      padding: 0.8rem;
+      border-radius: 16px;
+      background: rgba(31, 138, 112, 0.08);
+      border: 1px solid rgba(31, 138, 112, 0.16);
+      min-height: 170px;
+      min-width: 0;
+    }
+
+    .bar-stack {
+      position: relative;
+      width: 100%;
+      height: 100px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .bar-fill {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 12px 12px 8px 8px;
+      transition: height 0.3s ease;
+      height: 0%;
+    }
+
+    .bar-fill.target {
+      border: 2px dashed var(--target);
+      background: rgba(90, 90, 90, 0.08);
+    }
+
+    .bar-fill.actual {
+      background: linear-gradient(180deg, rgba(31, 138, 112, 0.85), rgba(31, 138, 112, 0.35));
+      box-shadow: 0 8px 18px rgba(31, 138, 112, 0.18);
+    }
+
+    .bar-label {
+      font-weight: 600;
+      color: #1b1b1b;
+      text-align: center;
+    }
+
+    .bar-values {
+      display: grid;
+      gap: 0.2rem;
+      font-size: 0.85rem;
+      text-align: center;
+      color: #2f3441;
+    }
+
+    .bar-values span {
+      display: block;
+    }
+
+    .distance {
+      display: grid;
+      gap: 0.6rem;
+      margin-top: 0.4rem;
+    }
+
+    .distance-bar {
+      position: relative;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(26, 31, 43, 0.08);
+      overflow: hidden;
+    }
+
+    .distance-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.3s ease, background 0.3s ease;
+      background: linear-gradient(90deg, #d64541, #f2b134, #1f8a70);
+    }
+
+    .distance-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #2f3441;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    button {
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 138, 112, 0.35);
+      background: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(26, 31, 43, 0.12);
+    }
+
+    button.primary {
+      background: rgba(31, 138, 112, 0.2);
+      border-color: rgba(31, 138, 112, 0.45);
+      color: #15483d;
+    }
+
+    .resolution {
+      display: grid;
+      gap: 0.6rem;
+      padding: 1rem 1.2rem;
+      border-radius: 18px;
+      background: rgba(31, 138, 112, 0.1);
+      border: 1px solid rgba(31, 138, 112, 0.3);
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(6px);
+      transition: max-height 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .resolution.is-visible {
+      max-height: 220px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .success-glow {
+      animation: glow 1.2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 0 0 rgba(31, 138, 112, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 28px rgba(31, 138, 112, 0.25);
+      }
+    }
+
+    .backlink {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--accent-3);
+      font-weight: 600;
+    }
+
+    .backlink::before {
+      content: "←";
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    @media (max-width: 920px) {
+      .game-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .histogram-grid {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+
+      .right-stack {
+        gap: 1.2rem;
+      }
+
+      .top-links {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="logo-button" href="index.html" aria-label="Volver a la pagina principal">
+      <img src="LogoGCCCNyN.png" alt="Logo GCCC NyN" />
+    </a>
+    <nav class="top-links" aria-label="Navegacion principal">
+      <a href="index.html">Pagina principal</a>
+      <a href="simulador.html">Simulador</a>
+    </nav>
+  </div>
+
+  <main class="shell">
+    <section class="game">
+      <header class="level-header">
+        <div>
+          <h1>El Constructor de Oráculo</h1>
+          <p>Construye circuitos que hagan coincidir o separar histogramas. Hay muchas soluciones posibles: explora y gana por distribución.</p>
+        </div>
+        <div class="level-controls">
+          <label for="level-select" class="level-badge">Nivel</label>
+          <select id="level-select" aria-label="Selector de nivel">
+            <option value="0">Nivel 1 · Superposición local</option>
+            <option value="1">Nivel 2 · Estado de Bell Φ+</option>
+            <option value="2">Nivel 3 · Interferencia destructiva</option>
+            <option value="3">Nivel 4 · Distinguir fases</option>
+            <option value="4">Nivel 5 · Deutsch (balanceada)</option>
+            <option value="5">Nivel 6 · Grover 2 qubits</option>
+            <option value="6">Nivel 7 · Bernstein-Vazirani 2 bits</option>
+          </select>
+          <span id="level-title" class="level-badge">Superposición local</span>
+        </div>
+        <p id="level-description"></p>
+        <div id="level-goal" class="objective"></div>
+        <div id="level-hint" class="hint"></div>
+      </header>
+
+      <div class="game-layout">
+        <aside class="panel left-rail" aria-label="Panel de compuertas">
+          <h2>Compuertas</h2>
+          <div class="gate-menu" aria-label="Menu de compuertas">
+            <h3>Disponibles</h3>
+            <div class="gate-palette">
+              <div class="gate-chip" draggable="true" data-gate="X">X</div>
+              <div class="gate-chip" draggable="true" data-gate="Z">Z</div>
+              <div class="gate-chip" draggable="true" data-gate="S">S</div>
+              <div class="gate-chip" draggable="true" data-gate="P">P</div>
+              <div class="gate-chip" draggable="true" data-gate="H">H</div>
+              <div class="gate-chip" draggable="true" data-gate="Rx">Rx</div>
+              <div class="gate-chip" draggable="true" data-gate="Rz">Rz</div>
+              <div class="gate-chip" draggable="true" data-gate="CZ">CZ</div>
+              <div class="gate-chip" draggable="true" data-gate="CNOT">CNOT</div>
+            </div>
+          </div>
+        </aside>
+
+        <div class="right-stack">
+          <section class="panel" aria-label="Panel de circuito">
+            <h2>Circuito editable</h2>
+            <p>Arrastra compuertas a los espacios. Para Rx, Rz o P se te pide un valor en fracción de 2π.</p>
+            <div class="circuit" aria-label="Circuito de 2 qubits">
+              <div class="wire-row" data-qubit="0">
+                <div class="ket-label">|0⟩</div>
+                <div class="gate-track" aria-label="Fila de compuertas para qubit 1">
+                  <div class="gate-slot" data-dropzone="true" data-slot="1" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="2" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="3" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="4" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="5" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="6" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="7" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="8" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="9" data-qubit="0"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="10" data-qubit="0"></div>
+                </div>
+              </div>
+              <div class="wire-row" data-qubit="1">
+                <div class="ket-label">|0⟩</div>
+                <div class="gate-track" aria-label="Fila de compuertas para qubit 2">
+                  <div class="gate-slot" data-dropzone="true" data-slot="1" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="2" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="3" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="4" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="5" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="6" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="7" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="8" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="9" data-qubit="1"></div>
+                  <div class="gate-slot" data-dropzone="true" data-slot="10" data-qubit="1"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" aria-label="Panel de histograma">
+            <h2>Histograma objetivo vs actual</h2>
+            <div class="state-panel" id="state-panel">
+              <div><strong>Estado inicial:</strong> <span id="state-label">|00⟩</span></div>
+              <div><strong>Estado actual:</strong> <span id="state-output">|00⟩</span></div>
+            </div>
+            <div class="histogram">
+              <div class="histogram-grid">
+                <div class="histogram-bar">
+                  <div class="bar-stack">
+                    <div class="bar-fill target" data-target="0"></div>
+                    <div class="bar-fill actual" data-actual="0"></div>
+                  </div>
+                  <div class="bar-label">|00⟩</div>
+                  <div class="bar-values">
+                    <span data-target-value="0">Objetivo: 0%</span>
+                    <span data-actual-value="0">Actual: 0%</span>
+                  </div>
+                </div>
+                <div class="histogram-bar">
+                  <div class="bar-stack">
+                    <div class="bar-fill target" data-target="1"></div>
+                    <div class="bar-fill actual" data-actual="1"></div>
+                  </div>
+                  <div class="bar-label">|01⟩</div>
+                  <div class="bar-values">
+                    <span data-target-value="1">Objetivo: 0%</span>
+                    <span data-actual-value="1">Actual: 0%</span>
+                  </div>
+                </div>
+                <div class="histogram-bar">
+                  <div class="bar-stack">
+                    <div class="bar-fill target" data-target="2"></div>
+                    <div class="bar-fill actual" data-actual="2"></div>
+                  </div>
+                  <div class="bar-label">|10⟩</div>
+                  <div class="bar-values">
+                    <span data-target-value="2">Objetivo: 0%</span>
+                    <span data-actual-value="2">Actual: 0%</span>
+                  </div>
+                </div>
+                <div class="histogram-bar">
+                  <div class="bar-stack">
+                    <div class="bar-fill target" data-target="3"></div>
+                    <div class="bar-fill actual" data-actual="3"></div>
+                  </div>
+                  <div class="bar-label">|11⟩</div>
+                  <div class="bar-values">
+                    <span data-target-value="3">Objetivo: 0%</span>
+                    <span data-actual-value="3">Actual: 0%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="distance">
+              <div class="distance-bar" aria-label="Barra de proximidad">
+                <div class="distance-fill" id="distance-fill"></div>
+              </div>
+              <div class="distance-meta">
+                <span id="distance-label">d = 0.000</span>
+                <span id="distance-goal">Meta: d &lt; 0.01</span>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="reset-level">Reiniciar nivel</button>
+              <button id="next-level" class="primary" hidden>Siguiente nivel</button>
+            </div>
+            <div id="resolution-panel" class="resolution" aria-live="polite"></div>
+          </section>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <a class="backlink" href="index.html">Volver a la pagina principal</a>
+        <a class="backlink" href="simulador.html">Ir al simulador</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Motor cuantico: numeros complejos, matrices y aplicacion de compuertas
+    const complex = (re, im = 0) => ({ re, im });
+    const add = (a, b) => complex(a.re + b.re, a.im + b.im);
+    const mul = (a, b) => complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+    const expi = (theta) => complex(Math.cos(theta), Math.sin(theta));
+
+    const gateX = () => [
+      [complex(0), complex(1)],
+      [complex(1), complex(0)]
+    ];
+
+    const gateZ = () => [
+      [complex(1), complex(0)],
+      [complex(0), complex(-1)]
+    ];
+
+    const gateH = () => {
+      const inv = 1 / Math.sqrt(2);
+      return [
+        [complex(inv), complex(inv)],
+        [complex(inv), complex(-inv)]
+      ];
+    };
+
+    const gateS = () => [
+      [complex(1), complex(0)],
+      [complex(0), complex(0, 1)]
+    ];
+
+    const gateP = (theta) => [
+      [complex(1), complex(0)],
+      [complex(0), expi(theta)]
+    ];
+
+    const gateRx = (theta) => {
+      const c = Math.cos(theta / 2);
+      const s = Math.sin(theta / 2);
+      return [
+        [complex(c), complex(0, -s)],
+        [complex(0, -s), complex(c)]
+      ];
+    };
+
+    const gateRz = (theta) => [
+      [expi(-theta / 2), complex(0)],
+      [complex(0), expi(theta / 2)]
+    ];
+
+    const gateCZ = () => [
+      [complex(1), complex(0), complex(0), complex(0)],
+      [complex(0), complex(1), complex(0), complex(0)],
+      [complex(0), complex(0), complex(1), complex(0)],
+      [complex(0), complex(0), complex(0), complex(-1)]
+    ];
+
+    const gateCNOT01 = () => [
+      [complex(1), complex(0), complex(0), complex(0)],
+      [complex(0), complex(1), complex(0), complex(0)],
+      [complex(0), complex(0), complex(0), complex(1)],
+      [complex(0), complex(0), complex(1), complex(0)]
+    ];
+
+    const gateCNOT10 = () => [
+      [complex(1), complex(0), complex(0), complex(0)],
+      [complex(0), complex(0), complex(0), complex(1)],
+      [complex(0), complex(0), complex(1), complex(0)],
+      [complex(0), complex(1), complex(0), complex(0)]
+    ];
+
+    const applySingleQubitGate = (state, gate, target) => {
+      const out = [complex(0), complex(0), complex(0), complex(0)];
+      for (let a = 0; a < 2; a += 1) {
+        for (let b = 0; b < 2; b += 1) {
+          const idx = (a << 1) | b;
+          if (target === 0) {
+            for (let a2 = 0; a2 < 2; a2 += 1) {
+              const outIdx = (a2 << 1) | b;
+              out[outIdx] = add(out[outIdx], mul(gate[a2][a], state[idx]));
+            }
+          } else {
+            for (let b2 = 0; b2 < 2; b2 += 1) {
+              const outIdx = (a << 1) | b2;
+              out[outIdx] = add(out[outIdx], mul(gate[b2][b], state[idx]));
+            }
+          }
+        }
+      }
+      return out;
+    };
+
+    const applyTwoQubitGate = (state, gate) => {
+      const out = [complex(0), complex(0), complex(0), complex(0)];
+      for (let i = 0; i < 4; i += 1) {
+        for (let j = 0; j < 4; j += 1) {
+          out[i] = add(out[i], mul(gate[i][j], state[j]));
+        }
+      }
+      return out;
+    };
+
+    // Renderizado del estado en texto y calculo de probabilidades
+    const formatComplex = (z) => {
+      const re = Math.abs(z.re) < 1e-6 ? 0 : z.re;
+      const im = Math.abs(z.im) < 1e-6 ? 0 : z.im;
+      if (im === 0) return `${re.toFixed(3)}`;
+      if (re === 0) return `${im.toFixed(3)}i`;
+      const sign = im > 0 ? '+' : '-';
+      return `${re.toFixed(3)} ${sign} ${Math.abs(im).toFixed(3)}i`;
+    };
+
+    const renderState = (state) => {
+      const labels = ['|00⟩', '|01⟩', '|10⟩', '|11⟩'];
+      const parts = state.map((amp, idx) => `${formatComplex(amp)}${labels[idx]}`);
+      stateOutput.textContent = parts.join(' + ');
+    };
+
+    const probabilitiesFromState = (state) => state.map((amp) => amp.re * amp.re + amp.im * amp.im);
+
+    // Renderizado del histograma objetivo vs actual
+    let targetPrefix = 'Objetivo';
+    let actualPrefix = 'Actual';
+
+    const renderHistogram = (target, actual) => {
+      target.forEach((prob, idx) => {
+        const heightPct = Math.min(100, Math.max(0, prob * 100));
+        const fill = targetFills[idx];
+        const value = targetValues[idx];
+        if (fill) {
+          fill.style.height = `${heightPct}%`;
+        }
+        if (value) {
+          value.textContent = `${targetPrefix}: ${heightPct.toFixed(1)}%`;
+        }
+      });
+      actual.forEach((prob, idx) => {
+        const heightPct = Math.min(100, Math.max(0, prob * 100));
+        const fill = actualFills[idx];
+        const value = actualValues[idx];
+        if (fill) {
+          fill.style.height = `${heightPct}%`;
+        }
+        if (value) {
+          value.textContent = `${actualPrefix}: ${heightPct.toFixed(1)}%`;
+        }
+      });
+    };
+
+    // Lógica de niveles y reglas de victoria
+    const LEVELS = [
+      {
+        name: 'Superposición local',
+        description: 'Objetivo: 50% en |00⟩ y 50% en |10⟩ (o equivalente en el otro qubit).',
+        objective: 'Objetivo del nivel: igualar el histograma con 50% |00⟩ y 50% |10⟩ (o 50% |01⟩ y 50% |00⟩).',
+        hint: 'Concepto: H en un qubit crea superposición sin correlacionar al otro.',
+        target: [0.5, 0, 0.5, 0],
+        altTarget: [0.5, 0.5, 0, 0],
+        initialStateLabel: '|00⟩',
+        initialStateType: 'zero',
+        fixedGates: [],
+        mode: 'match',
+        goalText: 'Meta: d < 0.01',
+        resolution: 'Aplicaste H: la compuerta Hadamard rota el vector de estado π/2 sobre la esfera de Bloch, poniendo amplitudes iguales en |0⟩ y |1⟩. Por eso el histograma quedo 50/50.'
+      },
+      {
+        name: 'Estado de Bell Φ+',
+        description: 'Objetivo: 50% en |00⟩ y 50% en |11⟩.',
+        objective: 'Objetivo del nivel: preparar una distribucion con 50% |00⟩ y 50% |11⟩.',
+        hint: 'Restriccion: intenta hacerlo con H en ambos qubits. ¿Funciona? ¿Por que no?',
+        target: [0.5, 0, 0, 0.5],
+        initialStateLabel: '|00⟩',
+        initialStateType: 'zero',
+        fixedGates: [],
+        mode: 'match',
+        goalText: 'Meta: d < 0.01',
+        resolution: 'H en qubit 1 crea superposicion local. CNOT condiciona qubit 2 al estado de qubit 1. El resultado no puede escribirse como producto de dos estados separados: eso es entrelazamiento.'
+      },
+      {
+        name: 'Interferencia destructiva',
+        description: 'Objetivo: volver a |00⟩ desde |+⟩|+⟩ usando interferencia.',
+        objective: 'Objetivo del nivel: regresar a |00⟩ usando interferencia (debe quedar 100% en |00⟩).',
+        hint: 'Concepto: H · H = I. Las amplitudes se cancelan y se suman de nuevo.',
+        target: [1, 0, 0, 0],
+        initialStateLabel: '|+⟩|+⟩ (H pre-aplicada)',
+        initialStateType: 'zero',
+        fixedGates: [
+          { qubit: 0, slot: 0, type: 'H', label: 'H', locked: true },
+          { qubit: 1, slot: 0, type: 'H', label: 'H', locked: true }
+        ],
+        mode: 'match',
+        goalText: 'Meta: d < 0.01',
+        resolution: 'Aplicar H dos veces es la identidad: las amplitudes que se separaron se vuelven a sumar constructivamente en |0⟩ y se cancelan destructivamente en |1⟩. El histograma colapsa a |00⟩.'
+      },
+      {
+        name: 'Distinguir fases',
+        description: 'El estado inicial es Φ+ o Φ−. Ambos lucen iguales en la base Z. Tienes que separar sus histogramas antes de medir.',
+        objective: 'Objetivo del nivel: aplicar compuertas que separen el histograma de Φ+ y Φ− (decodificacion).',
+        hint: 'Concepto: la fase relativa se revela al rotar de base (por ejemplo con H).',
+        target: [0.5, 0, 0, 0.5],
+        initialStateLabel: 'Φ? (Φ+ o Φ−)',
+        initialStateType: 'bell',
+        fixedGates: [],
+        mode: 'separate',
+        goalText: 'Meta: d > 0.45',
+        resolution: 'Los dos estados de Bell Φ+ y Φ− tienen el mismo histograma en la base Z. Pero en la base X (aplicando H antes de medir) se distinguen: sus fases relativas producen distribuciones distintas.'
+      },
+      {
+        name: 'Deutsch (balanceada)',
+        description: 'Algoritmo: Deutsch. Objetivo: medir el primer qubit en |1⟩ cuando la función es balanceada.',
+        objective: 'Objetivo del nivel: obtener 50% |10⟩ y 50% |11⟩ (primer qubit en |1⟩).',
+        hint: 'El oráculo balanceado ya está puesto. Tu meta es obtener 50% |10⟩ y 50% |11⟩.',
+        target: [0, 0, 0.5, 0.5],
+        initialStateLabel: '|0⟩|1⟩',
+        initialStateType: 'zero',
+        fixedGates: [
+          { qubit: 1, slot: 0, type: 'X', label: 'X', locked: true },
+          { qubit: 0, slot: 1, type: 'H', label: 'H', locked: true },
+          { qubit: 1, slot: 1, type: 'H', label: 'H', locked: true },
+          { qubit: 0, slot: 2, type: 'CNOT', role: 'control', locked: true },
+          { qubit: 1, slot: 2, type: 'CNOT', role: 'target', locked: true }
+        ],
+        mode: 'match',
+        goalText: 'Meta: d < 0.01',
+        resolution: 'En Deutsch, el oráculo balanceado introduce una fase relativa que se vuelve visible tras el último H. El primer qubit queda en |1⟩, señal de función balanceada.'
+      },
+      {
+        name: 'Grover 2 qubits',
+        description: 'Algoritmo: Grover. Objetivo: amplificar el estado marcado |11⟩ hasta casi 100%.',
+        objective: 'Objetivo del nivel: que el histograma termine con casi 100% en |11⟩.',
+        hint: 'El oráculo ya marcó |11⟩. Completa el difusor: H, X, CZ, X, H en ambos qubits.',
+        target: [0, 0, 0, 1],
+        initialStateLabel: '|00⟩',
+        initialStateType: 'zero',
+        fixedGates: [
+          { qubit: 0, slot: 0, type: 'H', label: 'H', locked: true },
+          { qubit: 1, slot: 0, type: 'H', label: 'H', locked: true },
+          { qubit: 0, slot: 1, type: 'CZ', locked: true },
+          { qubit: 1, slot: 1, type: 'CZ', locked: true }
+        ],
+        mode: 'match',
+        goalText: 'Meta: d < 0.01',
+        resolution: 'Grover aplica una inversion sobre el promedio que amplifica la probabilidad del estado marcado. Con el difusor correcto, |11⟩ domina el histograma.'
+      },
+      {
+        name: 'Bernstein-Vazirani 2 bits',
+        description: 'Algoritmo: Bernstein-Vazirani. Objetivo: revelar el secreto s=10 en un solo paso.',
+        objective: 'Objetivo del nivel: medir |10⟩ con 100% de probabilidad.',
+        hint: 'El oráculo de fase para s=10 ya está fijo. Tu meta es medir |10⟩ con 100%.',
+        target: [0, 0, 1, 0],
+        initialStateLabel: '|00⟩',
+        initialStateType: 'zero',
+        fixedGates: [
+          { qubit: 0, slot: 1, type: 'Z', label: 'Z', locked: true }
+        ],
+        mode: 'match',
+        goalText: 'Meta: d < 0.01',
+        resolution: 'Bernstein-Vazirani codifica el secreto como fases. Al aplicar H antes y después del oráculo, esas fases se convierten en el bitstring |10⟩.'
+      }
+    ];
+
+    // UI y estado del circuito
+    const levelSelect = document.getElementById('level-select');
+    const levelTitle = document.getElementById('level-title');
+    const levelDescription = document.getElementById('level-description');
+    const levelGoal = document.getElementById('level-goal');
+    const levelHint = document.getElementById('level-hint');
+    const stateLabel = document.getElementById('state-label');
+    const stateOutput = document.getElementById('state-output');
+    const distanceFill = document.getElementById('distance-fill');
+    const distanceLabel = document.getElementById('distance-label');
+    const distanceGoal = document.getElementById('distance-goal');
+    const resolutionPanel = document.getElementById('resolution-panel');
+    const resetButton = document.getElementById('reset-level');
+    const nextButton = document.getElementById('next-level');
+
+    const paletteGates = document.querySelectorAll('.gate-chip');
+    const slots = document.querySelectorAll('.gate-slot');
+    const targetFills = document.querySelectorAll('.bar-fill.target');
+    const actualFills = document.querySelectorAll('.bar-fill.actual');
+    const targetValues = document.querySelectorAll('[data-target-value]');
+    const actualValues = document.querySelectorAll('[data-actual-value]');
+    const histogramTitle = document.querySelector('.panel[aria-label="Panel de histograma"] h2');
+
+    const totalSlots = 10;
+    const GATE_CZ = 'CZ';
+    const GATE_CNOT = 'CNOT';
+
+    let placedGates = Array.from({ length: 2 }, () => Array(totalSlots).fill(null));
+    let currentLevel = 0;
+
+    const isTwoQubitGate = (gateData) => gateData?.type === GATE_CZ || gateData?.type === GATE_CNOT;
+
+    const slotHasTwoQubitGate = (slotIndex) =>
+      isTwoQubitGate(placedGates[0][slotIndex]) || isTwoQubitGate(placedGates[1][slotIndex]);
+
+    const isLockedSlot = (slotIndex) =>
+      placedGates[0][slotIndex]?.locked || placedGates[1][slotIndex]?.locked;
+
+    const clearSlot = (slotEl) => {
+      slotEl.innerHTML = '';
+      slotEl.classList.remove('has-cz', 'has-cnot', 'locked');
+    };
+
+    const placeGateToken = (slotEl, gateName) => {
+      clearSlot(slotEl);
+      if (!gateName) return;
+      const token = document.createElement('div');
+      if (gateName.type === GATE_CZ) {
+        token.className = 'gate-token cz';
+        slotEl.classList.add('has-cz');
+      } else if (gateName.type === GATE_CNOT) {
+        if (gateName.role === 'control') {
+          token.className = 'gate-token cnot-control';
+        } else {
+          token.className = 'gate-token cnot-target';
+        }
+        slotEl.classList.add('has-cnot');
+      } else {
+        token.className = 'gate-token';
+        token.textContent = gateName.label;
+      }
+      if (gateName.locked) {
+        slotEl.classList.add('locked');
+      }
+      slotEl.appendChild(token);
+    };
+
+    const updateGateGrid = (qubit, slot, gateName) => {
+      placedGates[qubit][slot] = gateName;
+      const slotEl = document.querySelector(`.gate-slot[data-qubit="${qubit}"][data-slot="${slot + 1}"]`);
+      if (slotEl) {
+        placeGateToken(slotEl, gateName);
+      }
+    };
+
+    const clearGateGrid = (qubit, slot) => {
+      placedGates[qubit][slot] = null;
+      const slotEl = document.querySelector(`.gate-slot[data-qubit="${qubit}"][data-slot="${slot + 1}"]`);
+      if (slotEl) {
+        clearSlot(slotEl);
+      }
+    };
+
+    const renderAllSlots = () => {
+      slots.forEach((slotEl) => {
+        const qubit = Number(slotEl.dataset.qubit);
+        const slotIndex = Number(slotEl.dataset.slot) - 1;
+        placeGateToken(slotEl, placedGates[qubit][slotIndex]);
+      });
+    };
+
+    const shiftSlotRight = (slotIndex) => {
+      if (slotIndex >= totalSlots - 1) return false;
+      if (isLockedSlot(slotIndex)) return false;
+      const nextIndex = slotIndex + 1;
+      if (isLockedSlot(nextIndex)) return false;
+      const nextOccupied = slotHasTwoQubitGate(nextIndex) ||
+        placedGates[0][nextIndex] || placedGates[1][nextIndex];
+      if (nextOccupied) {
+        if (!shiftSlotRight(nextIndex)) return false;
+      }
+      const top = placedGates[0][slotIndex];
+      const bottom = placedGates[1][slotIndex];
+      if (top) updateGateGrid(0, nextIndex, top);
+      if (bottom) updateGateGrid(1, nextIndex, bottom);
+      clearGateGrid(0, slotIndex);
+      clearGateGrid(1, slotIndex);
+      return true;
+    };
+
+    const shiftSingleRight = (qubit, slotIndex) => {
+      if (slotIndex >= totalSlots - 1) return false;
+      if (isLockedSlot(slotIndex)) return false;
+      if (slotHasTwoQubitGate(slotIndex)) {
+        return shiftSlotRight(slotIndex);
+      }
+      const gateHere = placedGates[qubit][slotIndex];
+      if (!gateHere) return true;
+      const nextIndex = slotIndex + 1;
+      if (isLockedSlot(nextIndex)) return false;
+      if (slotHasTwoQubitGate(nextIndex)) {
+        if (!shiftSlotRight(nextIndex)) return false;
+      } else if (placedGates[qubit][nextIndex]) {
+        if (!shiftSingleRight(qubit, nextIndex)) return false;
+      }
+      updateGateGrid(qubit, nextIndex, gateHere);
+      clearGateGrid(qubit, slotIndex);
+      return true;
+    };
+
+    const makeRoomForGate = (qubit, slotIndex, gateType) => {
+      if (isLockedSlot(slotIndex)) return false;
+      if (gateType === GATE_CZ || gateType === GATE_CNOT) {
+        if (slotHasTwoQubitGate(slotIndex) || placedGates[0][slotIndex] || placedGates[1][slotIndex]) {
+          return shiftSlotRight(slotIndex);
+        }
+        return true;
+      }
+      if (placedGates[qubit][slotIndex] || slotHasTwoQubitGate(slotIndex)) {
+        return shiftSingleRight(qubit, slotIndex);
+      }
+      return true;
+    };
+
+    const buildGate = (gateData) => {
+      switch (gateData.type) {
+        case 'X':
+          return gateX();
+        case 'Z':
+          return gateZ();
+        case 'S':
+          return gateS();
+        case 'P':
+          return gateP(gateData.theta);
+        case 'H':
+          return gateH();
+        case 'Rx':
+          return gateRx(gateData.theta);
+        case 'Rz':
+          return gateRz(gateData.theta);
+        default:
+          return gateH();
+      }
+    };
+
+    const applyCircuit = (initialState) => {
+      let state = initialState.map((amp) => complex(amp.re, amp.im));
+      for (let slot = 0; slot < totalSlots; slot += 1) {
+        const gateTop = placedGates[0][slot];
+        const gateBottom = placedGates[1][slot];
+        const hasCZ = gateTop?.type === GATE_CZ || gateBottom?.type === GATE_CZ;
+        const hasCNOT = gateTop?.type === GATE_CNOT || gateBottom?.type === GATE_CNOT;
+
+        if (gateTop && !isTwoQubitGate(gateTop)) {
+          state = applySingleQubitGate(state, buildGate(gateTop), 0);
+        }
+        if (gateBottom && !isTwoQubitGate(gateBottom)) {
+          state = applySingleQubitGate(state, buildGate(gateBottom), 1);
+        }
+        if (hasCZ) {
+          state = applyTwoQubitGate(state, gateCZ());
+        }
+        if (hasCNOT) {
+          if (gateTop?.role === 'control' && gateBottom?.role === 'target') {
+            state = applyTwoQubitGate(state, gateCNOT01());
+          } else if (gateTop?.role === 'target' && gateBottom?.role === 'control') {
+            state = applyTwoQubitGate(state, gateCNOT10());
+          }
+        }
+      }
+      return state;
+    };
+
+    const totalVariationDistance = (p, q) =>
+      0.5 * p.reduce((acc, value, idx) => acc + Math.abs(value - q[idx]), 0);
+
+    const updateDistanceBar = (value) => {
+      const clamped = Math.max(0, Math.min(1, value));
+      distanceFill.style.width = `${clamped * 100}%`;
+      distanceFill.style.background = `linear-gradient(90deg, #d64541, #f2b134 ${clamped * 60}%, #1f8a70)`;
+      distanceLabel.textContent = `d = ${value.toFixed(3)}`;
+    };
+
+    const setSolved = (solved, text) => {
+      const panel = document.querySelector('.panel[aria-label="Panel de histograma"]');
+      if (solved) {
+        panel.classList.add('success-glow');
+        resolutionPanel.textContent = text;
+        resolutionPanel.classList.add('is-visible');
+        nextButton.hidden = false;
+      } else {
+        panel.classList.remove('success-glow');
+        resolutionPanel.textContent = '';
+        resolutionPanel.classList.remove('is-visible');
+        nextButton.hidden = true;
+      }
+    };
+
+    const recomputeState = () => {
+      const level = LEVELS[currentLevel];
+      const zeroState = [complex(1), complex(0), complex(0), complex(0)];
+      const plusPlusState = applySingleQubitGate(applySingleQubitGate(zeroState, gateH(), 0), gateH(), 1);
+      const phiPlusState = [
+        complex(1 / Math.sqrt(2)),
+        complex(0),
+        complex(0),
+        complex(1 / Math.sqrt(2))
+      ];
+      const phiMinusState = [
+        complex(1 / Math.sqrt(2)),
+        complex(0),
+        complex(0),
+        complex(-1 / Math.sqrt(2))
+      ];
+
+      let initialState = zeroState;
+      if (level.initialStateType === 'plusplus') {
+        initialState = plusPlusState;
+      }
+
+      if (level.mode === 'match') {
+        const state = applyCircuit(initialState);
+        renderState(state);
+        const probs = probabilitiesFromState(state);
+        let activeTarget = level.target;
+        let distance = totalVariationDistance(probs, level.target);
+        if (level.altTarget) {
+          const altDistance = totalVariationDistance(probs, level.altTarget);
+          if (altDistance < distance) {
+            distance = altDistance;
+            activeTarget = level.altTarget;
+          }
+        }
+        renderHistogram(activeTarget, probs);
+        updateDistanceBar(1 - distance);
+        distanceLabel.textContent = `d = ${distance.toFixed(3)}`;
+        distanceGoal.textContent = level.goalText;
+        const solved = distance < 0.01;
+        setSolved(solved, level.resolution);
+      } else {
+        const statePlus = applyCircuit(phiPlusState);
+        const stateMinus = applyCircuit(phiMinusState);
+        const probsPlus = probabilitiesFromState(statePlus);
+        const probsMinus = probabilitiesFromState(stateMinus);
+        renderState(statePlus);
+        renderHistogram(probsPlus, probsMinus);
+        const distance = totalVariationDistance(probsPlus, probsMinus);
+        updateDistanceBar(distance);
+        distanceLabel.textContent = `d = ${distance.toFixed(3)} (separacion)`;
+        distanceGoal.textContent = level.goalText;
+        const solved = distance > 0.45;
+        setSolved(solved, level.resolution);
+      }
+    };
+
+    const askRotationFraction = (gateLabel) => {
+      const message = `Ingresa θ como fraccion de 2π para ${gateLabel} (ej. 0.25 = π/2, 1 = 2π):`;
+      const raw = window.prompt(message, '0.25');
+      if (raw === null) return null;
+      const value = Number(raw.trim());
+      if (Number.isNaN(value)) {
+        window.alert('Valor invalido. Usa un numero como 0.25 o 0.5.');
+        return null;
+      }
+      return value * 2 * Math.PI;
+    };
+
+    // Arrastrar y soltar de compuertas
+    paletteGates.forEach((gate) => {
+      gate.addEventListener('dragstart', (event) => {
+        event.dataTransfer.setData('text/plain', gate.dataset.gate);
+      });
+    });
+
+    slots.forEach((slotEl) => {
+      slotEl.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        if (slotEl.classList.contains('locked')) return;
+        slotEl.classList.add('is-drag-over');
+      });
+
+      slotEl.addEventListener('dragleave', () => {
+        slotEl.classList.remove('is-drag-over');
+      });
+
+      slotEl.addEventListener('drop', (event) => {
+        event.preventDefault();
+        slotEl.classList.remove('is-drag-over');
+        if (slotEl.classList.contains('locked')) return;
+        const gateName = event.dataTransfer.getData('text/plain');
+        if (!gateName) return;
+
+        const qubit = Number(slotEl.dataset.qubit);
+        const slotIndex = Number(slotEl.dataset.slot) - 1;
+
+        if (gateName === 'CZ') {
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          updateGateGrid(0, slotIndex, { type: GATE_CZ });
+          updateGateGrid(1, slotIndex, { type: GATE_CZ });
+        } else if (gateName === 'CNOT') {
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          if (qubit === 0) {
+            updateGateGrid(0, slotIndex, { type: GATE_CNOT, role: 'target' });
+            updateGateGrid(1, slotIndex, { type: GATE_CNOT, role: 'control' });
+          } else {
+            updateGateGrid(0, slotIndex, { type: GATE_CNOT, role: 'control' });
+            updateGateGrid(1, slotIndex, { type: GATE_CNOT, role: 'target' });
+          }
+        } else if (gateName === 'Rx' || gateName === 'Rz' || gateName === 'P') {
+          const theta = askRotationFraction(gateName);
+          if (theta === null) return;
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          updateGateGrid(qubit, slotIndex, { type: gateName, theta, label: gateName });
+        } else {
+          if (!makeRoomForGate(qubit, slotIndex, gateName)) return;
+          updateGateGrid(qubit, slotIndex, { type: gateName, label: gateName });
+        }
+        recomputeState();
+      });
+
+      const removeGateFromSlot = () => {
+        const qubit = Number(slotEl.dataset.qubit);
+        const slotIndex = Number(slotEl.dataset.slot) - 1;
+        const gateName = placedGates[qubit][slotIndex];
+        if (!gateName || gateName.locked) return;
+        if (gateName.type === GATE_CZ || gateName.type === GATE_CNOT) {
+          if (placedGates[0][slotIndex]?.locked || placedGates[1][slotIndex]?.locked) return;
+          clearGateGrid(0, slotIndex);
+          clearGateGrid(1, slotIndex);
+        } else {
+          clearGateGrid(qubit, slotIndex);
+        }
+        recomputeState();
+      };
+
+      slotEl.addEventListener('click', removeGateFromSlot);
+      slotEl.addEventListener('dblclick', removeGateFromSlot);
+    });
+
+    // Reinicio de nivel y cambio de nivel
+    const resetLevel = () => {
+      placedGates = Array.from({ length: 2 }, () => Array(totalSlots).fill(null));
+      const level = LEVELS[currentLevel];
+      level.fixedGates.forEach((gate) => {
+        updateGateGrid(gate.qubit, gate.slot, gate);
+      });
+      renderAllSlots();
+      recomputeState();
+    };
+
+    const loadLevel = (index) => {
+      currentLevel = index;
+      const level = LEVELS[currentLevel];
+      levelTitle.textContent = level.name;
+      levelDescription.textContent = level.description;
+      levelGoal.textContent = level.objective || '';
+      levelHint.textContent = level.hint;
+      stateLabel.textContent = level.initialStateLabel;
+      distanceGoal.textContent = level.goalText;
+      if (level.mode === 'separate') {
+        targetPrefix = 'Φ+';
+        actualPrefix = 'Φ−';
+        if (histogramTitle) {
+          histogramTitle.textContent = 'Histograma Φ+ vs Φ−';
+        }
+      } else {
+        targetPrefix = 'Objetivo';
+        actualPrefix = 'Actual';
+        if (histogramTitle) {
+          histogramTitle.textContent = 'Histograma objetivo vs actual';
+        }
+      }
+      resetLevel();
+    };
+
+    levelSelect.addEventListener('change', (event) => {
+      loadLevel(Number(event.target.value));
+    });
+
+    resetButton.addEventListener('click', resetLevel);
+
+    nextButton.addEventListener('click', () => {
+      const nextIndex = (currentLevel + 1) % LEVELS.length;
+      levelSelect.value = String(nextIndex);
+      loadLevel(nextIndex);
+    });
+
+    loadLevel(0);
+  </script>
+</body>
+</html>
