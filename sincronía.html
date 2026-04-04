@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sincronía - Juego de burbujas cuánticas</title>
+  <style>
+    :root {
+      --ink: #1a1f2b;
+      --text-strong: #111317;
+      --text-muted: #2f3441;
+      --paper: #f4f0ea;
+      --panel: #ffffff;
+      --accent: #1f8a70;
+      --accent-2: #f2b134;
+      --accent-3: #7a4e2d;
+      --shadow: rgba(26, 31, 43, 0.12);
+      --bubble-purple: #7f77dd;
+      --orange: #f0997b;
+      --orange-text: #712b13;
+      --blue: #85b7eb;
+      --blue-text: #0c447c;
+      --success: #cdebd8;
+      --success-text: #0b2e13;
+      --error: #f6d0d0;
+      --error-text: #4a0f0f;
+      --neutral: #e6e6e6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #f0f1f5;
+        --text-strong: #f6f7fb;
+        --text-muted: #d6d9e2;
+        --paper: #111317;
+        --panel: #1c1f26;
+        --shadow: rgba(0, 0, 0, 0.35);
+        --neutral: #2a2d36;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #eef1f4 0%, #f6f1ea 50%, #efe7dc 100%);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 6vw 0;
+    }
+
+    .logo-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.7rem;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid rgba(31, 138, 112, 0.22);
+      box-shadow: 0 12px 24px var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .logo-button img {
+      width: clamp(260px, 36vw, 420px);
+      height: auto;
+      display: block;
+    }
+
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 6vw 4rem;
+      display: grid;
+      gap: 1.6rem;
+    }
+
+    .hud {
+      display: grid;
+      gap: 0.8rem;
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 1rem 1.2rem;
+      box-shadow: 0 16px 32px var(--shadow);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+    }
+
+    .hud-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .level-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+    }
+
+    .level-select select {
+      padding: 0.35rem 0.7rem;
+      border-radius: 10px;
+      border: 1px solid rgba(31, 138, 112, 0.35);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .hud-item {
+      font-weight: 600;
+    }
+
+    .lives {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .life-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.18);
+      opacity: 0.95;
+    }
+
+    .life-dot.off {
+      opacity: 0.2;
+      background: var(--neutral);
+    }
+
+    .progress {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(31, 138, 112, 0.25);
+    }
+
+    .progress-dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+
+    .progress-dot.done {
+      background: var(--accent-2);
+    }
+
+    .hint-panel {
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      background: rgba(31, 138, 112, 0.1);
+      border: 1px dashed rgba(31, 138, 112, 0.4);
+      font-size: 0.95rem;
+    }
+
+    .board {
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 1.6rem;
+      box-shadow: 0 20px 40px var(--shadow);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .target-zone {
+      padding: 0.6rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(240, 153, 123, 0.2);
+      color: var(--orange-text);
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .target-zone.blue {
+      background: rgba(133, 183, 235, 0.2);
+      color: var(--blue-text);
+    }
+
+    .bubble-row {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .bubble-card {
+      display: grid;
+      gap: 0.6rem;
+      justify-items: center;
+      min-width: 120px;
+    }
+
+    .bubble {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--ink);
+      border: 2px dashed var(--bubble-purple);
+    }
+
+    .bubble:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px var(--shadow);
+    }
+
+    .bubble.collapsed {
+      border-style: solid;
+    }
+
+    .bubble.orange {
+      background: var(--orange);
+      color: var(--orange-text);
+      border-color: rgba(113, 43, 19, 0.4);
+    }
+
+    .bubble.blue {
+      background: var(--blue);
+      color: var(--blue-text);
+      border-color: rgba(12, 68, 124, 0.4);
+    }
+
+    .pair-grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .pair-card {
+      background: rgba(31, 138, 112, 0.08);
+      border-radius: 18px;
+      padding: 1rem;
+      display: grid;
+      gap: 0.8rem;
+      border: 1px solid rgba(31, 138, 112, 0.2);
+    }
+
+    .pair-title {
+      font-weight: 700;
+    }
+
+    .pair-target {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .feedback {
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      background: var(--neutral);
+      color: var(--text-strong);
+      font-weight: 600;
+    }
+
+    .feedback.success {
+      background: #e6f4ea;
+      color: var(--success-text);
+      border: 1px solid rgba(31, 77, 44, 0.25);
+    }
+
+    .feedback.error {
+      background: #fdecec;
+      color: var(--error-text);
+      border: 1px solid rgba(107, 31, 31, 0.25);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    button {
+      padding: 0.6rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 138, 112, 0.35);
+      background: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px var(--shadow);
+    }
+
+    .primary {
+      background: rgba(31, 138, 112, 0.2);
+      border-color: rgba(31, 138, 112, 0.5);
+      color: #15483d;
+    }
+
+    .explain {
+      display: none;
+      gap: 0.6rem;
+      padding: 1rem 1.2rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(31, 138, 112, 0.22);
+      box-shadow: 0 16px 30px var(--shadow);
+      color: #111;
+    }
+
+    .explain.active {
+      display: grid;
+    }
+
+    #explain-text,
+    #explain-formula {
+      color: #111;
+    }
+
+    .explain code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.95rem;
+      background: rgba(31, 138, 112, 0.08);
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+    }
+
+    .canvas-wrap {
+      display: grid;
+      gap: 1rem;
+    }
+
+    canvas {
+      width: 100%;
+      height: 220px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 16px;
+      border: 1px solid rgba(31, 138, 112, 0.18);
+    }
+
+    .phase-row {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .probabilities {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .prob-card {
+      flex: 1 1 140px;
+      padding: 0.7rem 0.9rem;
+      border-radius: 14px;
+      background: rgba(31, 138, 112, 0.08);
+      border: 1px solid rgba(31, 138, 112, 0.2);
+      font-weight: 600;
+    }
+
+    .final-screen {
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 20px 40px var(--shadow);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      text-align: center;
+    }
+
+    .final-screen.active {
+      display: grid;
+    }
+
+    .backlink {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--accent-3);
+      font-weight: 600;
+    }
+
+    .backlink::before {
+      content: "←";
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="logo-button" href="index.html" aria-label="Volver a la pagina principal">
+      <img src="LogoGCCCNyN.png" alt="Logo GCCC NyN" />
+    </a>
+  </div>
+
+  <main class="shell">
+    <section class="hud">
+      <div class="hud-row">
+        <div class="hud-item" id="level-label">Nivel 1 de 5</div>
+        <div class="hud-item">Puntaje: <span id="score">0</span></div>
+        <div class="hud-item">Observaciones: <span id="observations">4</span></div>
+        <label class="level-select" for="level-select">
+          Nivel:
+          <select id="level-select" aria-label="Selector de nivel"></select>
+        </label>
+        <div class="hud-item lives" aria-label="Vidas">
+          <span>Vidas:</span>
+          <div class="life-dot" data-life="0"></div>
+          <div class="life-dot" data-life="1"></div>
+          <div class="life-dot" data-life="2"></div>
+        </div>
+      </div>
+      <div class="progress" id="progress"></div>
+      <div class="hint-panel" id="hint"></div>
+    </section>
+
+    <section class="board" id="board"></section>
+
+    <div class="feedback" id="feedback">Selecciona una burbuja para observarla.</div>
+
+    <div class="explain" id="explain">
+      <div id="explain-text"></div>
+      <code id="explain-formula"></code>
+    </div>
+
+    <div class="actions">
+      <button id="reset-level">Reiniciar nivel</button>
+      <button id="next-level" class="primary" hidden>Siguiente nivel</button>
+    </div>
+
+    <section class="final-screen" id="final-screen">
+      <h2>Resultados finales</h2>
+      <p>Puntaje total: <strong id="final-score">0</strong></p>
+      <p>Has experimentado los tres pilares de la computación cuántica: superposición, entrelazamiento e interferencia.</p>
+      <div class="actions" style="justify-content:center;">
+        <button id="restart-game" class="primary">Reiniciar juego</button>
+        <a class="backlink" href="index.html">Volver a la pagina principal</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Motor de colapso: estados y observacion de burbujas
+    function collapse(particle) {
+      const r = Math.random();
+      particle.color = r < particle.probs.naranja ? "naranja" : "azul";
+      particle.state = "collapsed";
+    }
+
+    function observeParticle(pid, particles) {
+      const p = particles[pid];
+      if (p.state !== "superposed") return;
+      collapse(p);
+      if (p.pair !== undefined) {
+        const partner = particles[p.pair];
+        if (partner.state === "superposed") {
+          partner.color = p.pairType === "corr" ? p.color
+            : (p.color === "naranja" ? "azul" : "naranja");
+          partner.state = "collapsed";
+        }
+      }
+    }
+
+    // Interferencia (nivel 5)
+    function getProb(color, phase_deg) {
+      const phi = phase_deg * Math.PI / 180;
+      return color === "naranja" ? Math.pow(Math.cos(phi / 2), 2)
+        : Math.pow(Math.sin(phi / 2), 2);
+    }
+
+    // Logica de niveles y estado global
+    const LEVELS = [
+      {
+        name: "Superposición 50/50",
+        hint: "Objetivo: encontrar al menos 1 partícula naranja.",
+        type: "bubbles",
+        targetColor: "naranja",
+        particlesCount: 3,
+        probs: { naranja: 0.5, azul: 0.5 },
+        observationLimit: 4,
+        baseScore: 20,
+        bonusPerUnused: 5,
+        explanation: {
+          text: "Antes de que abrieras la burbuja, la partícula no era naranja ni azul: era ambas cosas simultáneamente con igual probabilidad. Al observar, la naturaleza elige. Esto no es ignorancia nuestra — el color no existe hasta que se mide.",
+          formula: "|ψ⟩ = (1/√2)|naranja⟩ + (1/√2)|azul⟩"
+        }
+      },
+      {
+        name: "Superposición desigual",
+        hint: "Objetivo: encontrar al menos 1 partícula azul.",
+        type: "bubbles",
+        targetColor: "azul",
+        particlesCount: 3,
+        probs: { naranja: 0.75, azul: 0.25 },
+        observationLimit: 3,
+        baseScore: 20,
+        bonusPerUnused: 5,
+        explanation: {
+          text: "La superposición no siempre es 50/50. Las amplitudes pueden estar inclinadas hacia un resultado. Pero la partícula sigue sin tener color fijo — solo probabilidades.",
+          formula: "|ψ⟩ = (√3/2)|naranja⟩ + (1/2)|azul⟩"
+        }
+      },
+      {
+        name: "Vínculos sincronizados y opuestos",
+        hint: "Objetivo: A y B naranjas; C naranja y D azul.",
+        type: "pairs",
+        observationLimit: 3,
+        baseScore: 30,
+        bonusPerUnused: 8,
+        explanation: {
+          text: "Al medir una partícula del par, la otra colapsa instantáneamente — sin importar la distancia. Pero no controlas qué color aparece; solo cuándo mides. Por eso el entrelazamiento no permite enviar mensajes.",
+          formula: "|Φ⁺⟩ = (1/√2)(|naranja,naranja⟩ + |azul,azul⟩)\n|Ψ⁺⟩ = (1/√2)(|naranja,azul⟩ + |azul,naranja⟩)"
+        }
+      },
+      {
+        name: "Vínculo desconocido",
+        hint: "Objetivo: identificar el tipo de vínculo de ambos pares.",
+        type: "pairs-unknown",
+        observationLimit: 3,
+        baseScore: 25,
+        bonusPerUnused: 10,
+        explanation: {
+          text: "Los experimentos de Bell (1964–1982) demostraron que ningún modelo de variables ocultas puede reproducir estas correlaciones. El estado compartido es la descripción completa del par — no hay información oculta que no hayas visto.",
+          formula: "Ningún modelo local λ satisface P(a,b|λ) = P(a|λ)·P(b|λ) para todos los pares entrelazados."
+        }
+      },
+      {
+        name: "Interferencia",
+        hint: "Objetivo: ajustar la fase hasta que P(naranja) > 85%.",
+        type: "interference",
+        baseScore: 50,
+        explanation: {
+          text: "La partícula toma ambos caminos simultáneamente. Las amplitudes se suman: si llegan en fase, se refuerzan (interferencia constructiva); si llegan desfasadas 180°, se cancelan (destructiva). Los algoritmos cuánticos apagan respuestas incorrectas usando este mecanismo.",
+          formula: "P(naranja) = cos²(φ/2); P(azul) = sin²(φ/2)"
+        }
+      }
+    ];
+
+    let currentLevel = 0;
+    let score = 0;
+    let lives = 3;
+    let observationsRemaining = 0;
+    let observationsUsed = 0;
+    let levelSolved = false;
+    let particles = [];
+    let bubbleMap = new Map();
+    let completedLevels = Array(LEVELS.length).fill(false);
+    let phaseValue = 0;
+
+    const board = document.getElementById("board");
+    const hint = document.getElementById("hint");
+    const levelLabel = document.getElementById("level-label");
+    const scoreEl = document.getElementById("score");
+    const observationsEl = document.getElementById("observations");
+    const feedback = document.getElementById("feedback");
+    const explain = document.getElementById("explain");
+    const explainText = document.getElementById("explain-text");
+    const explainFormula = document.getElementById("explain-formula");
+    const nextButton = document.getElementById("next-level");
+    const resetButton = document.getElementById("reset-level");
+    const levelSelect = document.getElementById("level-select");
+    const finalScreen = document.getElementById("final-screen");
+    const finalScore = document.getElementById("final-score");
+    const restartGameButton = document.getElementById("restart-game");
+
+    // UI/feedback
+    function setFeedback(type, text) {
+      feedback.className = "feedback";
+      if (type) {
+        feedback.classList.add(type);
+      }
+      feedback.textContent = text;
+    }
+
+    function updateLives() {
+      document.querySelectorAll(".life-dot").forEach((dot, idx) => {
+        dot.classList.toggle("off", idx >= lives);
+      });
+    }
+
+    function updateHUD() {
+      levelLabel.textContent = `Nivel ${currentLevel + 1} de ${LEVELS.length} · ${LEVELS[currentLevel].name}`;
+      scoreEl.textContent = Math.round(score);
+      const level = LEVELS[currentLevel];
+      observationsEl.textContent = level.type === "interference" ? "—" : Math.max(0, observationsRemaining);
+      hint.textContent = level.hint;
+      if (levelSelect) {
+        levelSelect.value = String(currentLevel);
+      }
+      updateLives();
+      renderProgress();
+    }
+
+    function renderProgress() {
+      const progress = document.getElementById("progress");
+      progress.innerHTML = "";
+      LEVELS.forEach((_, idx) => {
+        const dot = document.createElement("div");
+        dot.className = "progress-dot";
+        if (completedLevels[idx]) dot.classList.add("done");
+        if (idx === currentLevel) dot.classList.add("active");
+        progress.appendChild(dot);
+      });
+    }
+
+    // Renderizado del tablero
+    function createBubble(particle, label) {
+      const card = document.createElement("div");
+      card.className = "bubble-card";
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = "?";
+      bubble.addEventListener("click", () => handleObservation(particle.id));
+      const text = document.createElement("div");
+      text.textContent = label;
+      card.appendChild(bubble);
+      card.appendChild(text);
+      bubbleMap.set(particle.id, bubble);
+      return card;
+    }
+
+    function renderBubblesLevel(level) {
+      board.innerHTML = "";
+      const target = document.createElement("div");
+      target.className = "target-zone";
+      if (level.targetColor === "azul") {
+        target.classList.add("blue");
+        target.textContent = "Zona objetivo: azul";
+      } else {
+        target.textContent = "Zona objetivo: naranja";
+      }
+      board.appendChild(target);
+
+      const row = document.createElement("div");
+      row.className = "bubble-row";
+      particles.forEach((p, idx) => {
+        row.appendChild(createBubble(p, `Burbuja ${idx + 1}`));
+      });
+      board.appendChild(row);
+    }
+
+    function renderPairsLevel(level, unknown) {
+      board.innerHTML = "";
+      const grid = document.createElement("div");
+      grid.className = "pair-grid";
+      const labels = ["A", "B", "C", "D"];
+      const pairInfo = [
+        { title: "Par 1", indices: [0, 1], target: "A y B naranjas" },
+        { title: "Par 2", indices: [2, 3], target: "C naranja, D azul" }
+      ];
+
+      pairInfo.forEach((pair, pairIdx) => {
+        const card = document.createElement("div");
+        card.className = "pair-card";
+        const title = document.createElement("div");
+        title.className = "pair-title";
+        title.dataset.pairTitle = String(pairIdx);
+        title.textContent = unknown ? `${pair.title} (tipo ?)` : `${pair.title} (tipo ${pairIdx === 0 ? "corr" : "anti"})`;
+        const target = document.createElement("div");
+        target.className = "pair-target";
+        target.textContent = unknown ? "Objetivo: revela el tipo del vínculo" : `Objetivo: ${pair.target}`;
+
+        const row = document.createElement("div");
+        row.className = "bubble-row";
+        pair.indices.forEach((idx) => {
+          row.appendChild(createBubble(particles[idx], `Burbuja ${labels[idx]}`));
+        });
+
+        card.appendChild(title);
+        card.appendChild(target);
+        card.appendChild(row);
+        grid.appendChild(card);
+      });
+
+      board.appendChild(grid);
+    }
+
+    // Renderizado de canvas (nivel 5)
+    function renderInterferenceLevel() {
+      board.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "canvas-wrap";
+
+      const canvas = document.createElement("canvas");
+      canvas.id = "wave-canvas";
+      wrap.appendChild(canvas);
+
+      const phaseRow = document.createElement("div");
+      phaseRow.className = "phase-row";
+      const phaseLabel = document.createElement("div");
+      phaseLabel.textContent = "Fase φ";
+      const phaseValueLabel = document.createElement("div");
+      phaseValueLabel.id = "phase-value";
+      phaseValueLabel.textContent = "0°";
+      phaseRow.appendChild(phaseLabel);
+      phaseRow.appendChild(phaseValueLabel);
+      wrap.appendChild(phaseRow);
+
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.min = "0";
+      slider.max = "360";
+      slider.value = "0";
+      slider.id = "phase-slider";
+      wrap.appendChild(slider);
+
+      const probs = document.createElement("div");
+      probs.className = "probabilities";
+      probs.innerHTML = `
+        <div class="prob-card" id="prob-orange">P(naranja): 100%</div>
+        <div class="prob-card" id="prob-blue">P(azul): 0%</div>
+      `;
+      wrap.appendChild(probs);
+
+      board.appendChild(wrap);
+
+      const ctx = canvas.getContext("2d");
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      function drawWaves(phiDeg) {
+        const width = canvas.getBoundingClientRect().width;
+        const height = canvas.getBoundingClientRect().height;
+        ctx.clearRect(0, 0, width, height);
+        ctx.lineWidth = 2;
+
+        const mid = height / 2;
+        const freq = 3;
+        const phi = phiDeg * Math.PI / 180;
+
+        ctx.beginPath();
+        ctx.strokeStyle = "#f0997b";
+        for (let x = 0; x <= width; x += 4) {
+          const y = mid + Math.sin((x / width) * Math.PI * 2 * freq) * 40;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.strokeStyle = "#85b7eb";
+        for (let x = 0; x <= width; x += 4) {
+          const y = mid + Math.sin((x / width) * Math.PI * 2 * freq + phi) * 40;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.strokeStyle = "#7f77dd";
+        for (let x = 0; x <= width; x += 4) {
+          const y1 = Math.sin((x / width) * Math.PI * 2 * freq);
+          const y2 = Math.sin((x / width) * Math.PI * 2 * freq + phi);
+          const y = mid + ((y1 + y2) / 2) * 40;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      function updateProbabilities(phiDeg) {
+        const pOrange = getProb("naranja", phiDeg);
+        const pBlue = getProb("azul", phiDeg);
+        document.getElementById("prob-orange").textContent = `P(naranja): ${Math.round(pOrange * 100)}%`;
+        document.getElementById("prob-blue").textContent = `P(azul): ${Math.round(pBlue * 100)}%`;
+        document.getElementById("phase-value").textContent = `${Math.round(phiDeg)}°`;
+        if (!levelSolved && pOrange > 0.85) {
+          handleSolved();
+        }
+      }
+
+      function redraw(phiDeg) {
+        drawWaves(phiDeg);
+        updateProbabilities(phiDeg);
+      }
+
+      resizeCanvas();
+      redraw(phaseValue);
+
+      slider.addEventListener("input", (event) => {
+        phaseValue = Number(event.target.value);
+        redraw(phaseValue);
+      });
+
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        redraw(phaseValue);
+      });
+    }
+
+    // Sistema de puntaje y control de vidas
+    function loseLife() {
+      if (levelSolved) return;
+      if (lives > 0) {
+        lives -= 1;
+      }
+      updateHUD();
+      setFeedback("error", "Se agotaron las observaciones. Pierdes una vida y el nivel reinicia.");
+      setTimeout(resetLevel, 1500);
+    }
+
+    function handleSolved() {
+      if (levelSolved) return;
+      levelSolved = true;
+      const level = LEVELS[currentLevel];
+      completedLevels[currentLevel] = true;
+      let bonus = 0;
+
+      if (level.type === "interference") {
+        bonus = Math.max(0, Math.floor((360 - phaseValue) / 10));
+      } else {
+        bonus = Math.max(0, observationsRemaining) * level.bonusPerUnused;
+      }
+
+      score += level.baseScore + bonus;
+      updateHUD();
+      setFeedback("success", "Objetivo cumplido. Sigue al siguiente nivel cuando quieras.");
+      explainText.textContent = level.explanation.text;
+      explainFormula.textContent = level.explanation.formula;
+      explain.classList.add("active");
+      nextButton.hidden = false;
+      nextButton.textContent = currentLevel === LEVELS.length - 1 ? "Ver resultados finales" : "Siguiente nivel";
+    }
+
+    // Logica de niveles
+    function setupParticlesForLevel(level) {
+      particles = [];
+      bubbleMap.clear();
+      if (level.type === "bubbles") {
+        particles = Array.from({ length: level.particlesCount }, (_, idx) => ({
+          id: idx,
+          state: "superposed",
+          probs: { ...level.probs },
+          color: null
+        }));
+      }
+      if (level.type === "pairs" || level.type === "pairs-unknown") {
+        const pairTypes = level.type === "pairs-unknown" ?
+          [Math.random() < 0.5 ? "corr" : "anti", Math.random() < 0.5 ? "corr" : "anti"] :
+          ["corr", "anti"];
+        particles = [
+          { id: 0, state: "superposed", probs: { naranja: 0.5, azul: 0.5 }, color: null, pair: 1, pairType: pairTypes[0] },
+          { id: 1, state: "superposed", probs: { naranja: 0.5, azul: 0.5 }, color: null, pair: 0, pairType: pairTypes[0] },
+          { id: 2, state: "superposed", probs: { naranja: 0.5, azul: 0.5 }, color: null, pair: 3, pairType: pairTypes[1] },
+          { id: 3, state: "superposed", probs: { naranja: 0.5, azul: 0.5 }, color: null, pair: 2, pairType: pairTypes[1] }
+        ];
+      }
+    }
+
+    function updateBubbleUI(particle) {
+      const bubble = bubbleMap.get(particle.id);
+      if (!bubble) return;
+      if (particle.state === "superposed") {
+        bubble.textContent = "?";
+        bubble.className = "bubble";
+        return;
+      }
+      bubble.className = "bubble collapsed";
+      if (particle.color === "naranja") {
+        bubble.classList.add("orange");
+        bubble.textContent = "N";
+      } else {
+        bubble.classList.add("blue");
+        bubble.textContent = "A";
+      }
+    }
+
+    function updatePairLabels() {
+      if (LEVELS[currentLevel].type !== "pairs-unknown") return;
+      const pairTitles = document.querySelectorAll("[data-pair-title]");
+      const pairStates = [
+        particles[0].state === "collapsed" && particles[1].state === "collapsed",
+        particles[2].state === "collapsed" && particles[3].state === "collapsed"
+      ];
+      pairTitles.forEach((el, idx) => {
+        if (pairStates[idx]) {
+          const type = particles[idx * 2].pairType === "corr" ? "correlacionado" : "anticorrelacionado";
+          el.textContent = `Par ${idx + 1} (tipo ${type})`;
+        } else {
+          el.textContent = `Par ${idx + 1} (tipo ?)`;
+        }
+      });
+    }
+
+    function checkObjective() {
+      const level = LEVELS[currentLevel];
+      if (level.type === "bubbles") {
+        return particles.some((p) => p.color === level.targetColor);
+      }
+      if (level.type === "pairs") {
+        return particles[0].color === "naranja" && particles[1].color === "naranja" &&
+          particles[2].color === "naranja" && particles[3].color === "azul";
+      }
+      if (level.type === "pairs-unknown") {
+        return particles[0].state === "collapsed" && particles[1].state === "collapsed" &&
+          particles[2].state === "collapsed" && particles[3].state === "collapsed";
+      }
+      return false;
+    }
+
+    function handleObservation(pid) {
+      const level = LEVELS[currentLevel];
+      if (level.type === "interference" || levelSolved) return;
+      const particle = particles[pid];
+      if (!particle || particle.state !== "superposed") return;
+      observationsUsed += 1;
+      observationsRemaining -= 1;
+      observeParticle(pid, particles);
+      particles.forEach(updateBubbleUI);
+      updatePairLabels();
+      updateHUD();
+
+      if (checkObjective()) {
+        handleSolved();
+        return;
+      }
+
+      if (observationsRemaining <= 0) {
+        loseLife();
+      } else {
+        setFeedback("", "La observacion colapso la burbuja. Sigue midiendo con cuidado.");
+      }
+    }
+
+    function resetLevel() {
+      const level = LEVELS[currentLevel];
+      levelSolved = false;
+      explain.classList.remove("active");
+      nextButton.hidden = true;
+      observationsRemaining = level.observationLimit || 0;
+      observationsUsed = 0;
+      phaseValue = 0;
+      setupParticlesForLevel(level);
+
+      if (level.type === "bubbles") {
+        renderBubblesLevel(level);
+      } else if (level.type === "pairs") {
+        renderPairsLevel(level, false);
+      } else if (level.type === "pairs-unknown") {
+        renderPairsLevel(level, true);
+      } else {
+        renderInterferenceLevel();
+      }
+
+      particles.forEach(updateBubbleUI);
+      updatePairLabels();
+      setFeedback("", "Selecciona una burbuja para observarla.");
+      updateHUD();
+    }
+
+    function loadLevel(index) {
+      currentLevel = index;
+      resetLevel();
+    }
+
+    resetButton.addEventListener("click", resetLevel);
+
+    levelSelect.addEventListener("change", (event) => {
+      const index = Number(event.target.value);
+      if (Number.isNaN(index)) return;
+      loadLevel(index);
+    });
+
+    nextButton.addEventListener("click", () => {
+      if (currentLevel === LEVELS.length - 1) {
+        finalScore.textContent = Math.round(score);
+        finalScreen.classList.add("active");
+        board.style.display = "none";
+        feedback.style.display = "none";
+        explain.style.display = "none";
+        document.querySelector(".actions").style.display = "none";
+        return;
+      }
+      loadLevel(currentLevel + 1);
+    });
+
+    restartGameButton.addEventListener("click", () => {
+      score = 0;
+      lives = 3;
+      completedLevels = Array(LEVELS.length).fill(false);
+      finalScreen.classList.remove("active");
+      board.style.display = "";
+      feedback.style.display = "";
+      explain.style.display = "";
+      document.querySelector(".actions").style.display = "";
+      loadLevel(0);
+    });
+
+    function initLevelSelect() {
+      levelSelect.innerHTML = "";
+      LEVELS.forEach((level, idx) => {
+        const option = document.createElement("option");
+        option.value = String(idx);
+        option.textContent = `${idx + 1} · ${level.name}`;
+        levelSelect.appendChild(option);
+      });
+    }
+
+    initLevelSelect();
+    loadLevel(0);
+  </script>
+</body>
+</html>

@@ -209,6 +209,25 @@
     .backlink::before {
       content: "←";
     }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
+
+    .game-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(31, 138, 112, 0.25);
+      text-decoration: none;
+      color: var(--accent-3);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.7);
+    }
   </style>
 </head>
 <body>
@@ -224,7 +243,10 @@
         Ajusta la fase relativa para ver cómo las amplitudes se refuerzan o se cancelan. La onda morada representa la
         suma de las dos ondas base.
       </p>
-      <a class="backlink" href="index.html">Volver a la pagina principal</a>
+      <div class="nav-links">
+        <a class="backlink" href="index.html">Volver a la pagina principal</a>
+        <a class="game-link" href="sincronía.html">Jugar Sincronía</a>
+      </div>
     </header>
 
     <section class="stage">
