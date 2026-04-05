@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ultimas actualizaciones - Computacion cuantica</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    :root {
+      --ink: #1a1f2b;
+      --paper: #f7f3ee;
+      --mist: #e9e2d8;
+      --accent: #1f8a70;
+      --accent-2: #f2b134;
+      --accent-3: #7a4e2d;
+      --shadow: rgba(26, 31, 43, 0.12);
+      --glow: rgba(31, 138, 112, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 20% 10%, #fff6ea 0%, transparent 45%),
+        radial-gradient(circle at 85% 0%, #e3f4f0 0%, transparent 40%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 100%);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.8rem 6vw 0;
+      flex-wrap: wrap;
+    }
+
+    .logo-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.7rem;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid rgba(31, 138, 112, 0.22);
+      box-shadow: 0 12px 24px var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .logo-button img {
+      width: clamp(220px, 32vw, 360px);
+      height: auto;
+      display: block;
+    }
+
+    .directory {
+      display: grid;
+      gap: 0.25rem;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #2f3441;
+    }
+
+    .directory a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .directory a:hover {
+      text-decoration: underline;
+    }
+
+    header {
+      padding: 4.8rem 6vw 2.5rem;
+    }
+
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2.4rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      align-items: center;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(31, 138, 112, 0.12);
+      color: var(--accent);
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+    }
+
+    .hero h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.6rem, 4vw, 3.8rem);
+      line-height: 1.05;
+      margin: 0.9rem 0 1rem;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #2f3441;
+    }
+
+    .hero-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 1.8rem;
+      box-shadow: 0 20px 40px var(--shadow);
+      border: 1px solid rgba(26, 31, 43, 0.08);
+      display: grid;
+      gap: 1rem;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 6vw 5rem;
+      display: grid;
+      gap: 3rem;
+    }
+
+    .section-title {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+      margin-bottom: 1rem;
+    }
+
+    .cards {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 1.6rem;
+      box-shadow: 0 18px 40px var(--shadow);
+      display: grid;
+      gap: 0.8rem;
+      border: 1px solid rgba(26, 31, 43, 0.05);
+    }
+
+    .card strong {
+      font-size: 1.05rem;
+    }
+
+    .card a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .card a:hover {
+      text-decoration: underline;
+    }
+
+    .subsection {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .subsection h3 {
+      font-size: 1.2rem;
+      letter-spacing: 0.2px;
+    }
+
+    .list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .list-item {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      padding: 1rem 1.2rem;
+      border: 1px solid rgba(31, 138, 112, 0.16);
+      box-shadow: 0 12px 28px var(--shadow);
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .list-item a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .list-item a:hover {
+      text-decoration: underline;
+    }
+
+    .callout {
+      background: rgba(31, 138, 112, 0.1);
+      border-radius: 24px;
+      padding: 1.8rem;
+      border: 1px dashed rgba(31, 138, 112, 0.4);
+      display: grid;
+      gap: 0.8rem;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 6vw 3rem;
+      color: #2f3441;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .directory {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="logo-button" href="index.html" aria-label="Volver a la pagina principal">
+      <img src="LogoGCCCNyN.png" alt="Logo GCCC NyN" />
+    </a>
+    <div class="directory">
+      <strong>Directorio</strong>
+      <span>M. en C. Fernando Nieto Guadarrama.</span>
+      <span>Dr. Fernando Rojas Iñiguez.</span>
+      <span><a href="mailto:compcuanticacnyn@gmail.com">compcuanticacnyn@gmail.com</a></span>
+    </div>
+  </div>
+
+  <header>
+    <div class="hero">
+      <div>
+        <span class="tag">Ultimas actualizaciones</span>
+        <h1>Lo mas importante en computacion cuantica, NISQ y aplicaciones.</h1>
+        <p>
+          Resumen curado de comunicados, avances y anuncios que marcan el rumbo del ecosistema. Actualizado al 4 de abril
+          de 2026.
+        </p>
+      </div>
+      <div class="hero-card">
+        <strong>Como leer esta pagina</strong>
+        <p>
+          Cada tarjeta enlaza a la fuente original. Si aparece un anuncio nuevo en la semana, lo agregamos primero aqui y
+          luego lo reflejamos en su pagina de aplicacion.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2 class="section-title">Panorama general</h2>
+      <div class="cards">
+        <article class="card">
+          <strong>IBM publica su plan para computacion cuantica tolerante a fallos</strong>
+          <p>12 Mar 2026. <a href="https://newsroom.ibm.com/2026-03-12-ibm-unveils-blueprint-to-scale-fault-tolerant-quantum-computing">Ver anuncio</a></p>
+        </article>
+        <article class="card">
+          <strong>NVIDIA inaugura NVAQC para computacion cuantica acelerada</strong>
+          <p>18 Mar 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-worlds-first-accelerated-quantum-computing-research-center">Ver anuncio</a></p>
+        </article>
+        <article class="card">
+          <strong>NVIDIA anuncia NVQLink para integrar GPU, CPU y QPU</strong>
+          <p>28 Oct 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-nvqlink">Ver anuncio</a></p>
+        </article>
+        <article class="card">
+          <strong>NIST publica los primeros estandares de criptografia poscuantica</strong>
+          <p>13 Ago 2024. <a href="https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards">Ver anuncio</a></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="callout">
+      <h2 class="section-title">Epoca NISQ: que esta cambiando</h2>
+      <p>
+        Seguimos en una etapa de dispositivos ruidosos, pero la tendencia es clara: mas integracion con HPC, mejores
+        flujos hibridos y hojas de ruta hacia correccion de errores.
+      </p>
+      <div class="list">
+        <div class="list-item">
+          <strong>IBM define hitos hacia computacion tolerante a fallos</strong>
+          <p>12 Mar 2026. <a href="https://newsroom.ibm.com/2026-03-12-ibm-unveils-blueprint-to-scale-fault-tolerant-quantum-computing">Ver anuncio</a></p>
+        </div>
+        <div class="list-item">
+          <strong>NVAQC impulsa la combinacion de GPU y QPU en investigacion</strong>
+          <p>18 Mar 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-worlds-first-accelerated-quantum-computing-research-center">Ver anuncio</a></p>
+        </div>
+        <div class="list-item">
+          <strong>NVQLink promete un enlace rapido para sistemas hibridos</strong>
+          <p>28 Oct 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-nvqlink">Ver anuncio</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Actualizaciones por aplicacion</h2>
+      <div class="subsection">
+        <h3>Optimizacion</h3>
+        <div class="list">
+          <div class="list-item">
+            <strong>D-Wave lanza solver hibrido para problemas no lineales</strong>
+            <p>17 Jun 2024. <a href="https://investors.dwavesys.com/news/news-details/2024/D-Wave-Introduces-New-Hybrid-Quantum-Solver-at-Qubits-2024-to-Tackle-Customers-Previously-Intractable-Workforce-Manufacturing-and-Logistics-Optimization-Problems/default.aspx">Ver anuncio</a></p>
+          </div>
+          <div class="list-item">
+            <strong>D-Wave presenta casos de optimizacion en INFORMS 2024</strong>
+            <p>9 Oct 2024. <a href="https://www.dwavequantum.com/company/newsroom/press-release/d-wave-brings-quantum-optimization-to-2024-informs-annual-meeting/">Ver anuncio</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Quimica y materiales</h3>
+        <div class="list">
+          <div class="list-item">
+            <strong>IBM y Pasqal anuncian alianza para quimica y materiales</strong>
+            <p>6 Jun 2024. <a href="https://www.ibm.com/quantum/blog/ibm-pasqal-collaboration">Ver anuncio</a></p>
+          </div>
+          <div class="list-item">
+            <strong>NVIDIA presenta NVQLink para integrar HPC y computacion cuantica</strong>
+            <p>28 Oct 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-nvqlink">Ver anuncio</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Seguridad</h3>
+        <div class="list">
+          <div class="list-item">
+            <strong>NIST publica los primeros estandares de criptografia poscuantica</strong>
+            <p>13 Ago 2024. <a href="https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards">Ver anuncio</a></p>
+          </div>
+          <div class="list-item">
+            <strong>CISA, NSA y NIST recomiendan plan de migracion a PQC</strong>
+            <p>21 Ago 2023. <a href="https://www.cisa.gov/news-events/alerts/2023/08/21/cisa-nsa-and-nist-recommend-cryptographic-migration">Ver anuncio</a></p>
+          </div>
+          <div class="list-item">
+            <strong>Apple anuncia PQ3 para iMessage</strong>
+            <p>21 Feb 2024. <a href="https://security.apple.com/blog/imessage-pq3/">Ver anuncio</a></p>
+          </div>
+          <div class="list-item">
+            <strong>Cloudflare lanza protecciones quantum-safe para Zero Trust</strong>
+            <p>17 Mar 2025. <a href="https://blog.cloudflare.com/quantum-safe-zero-trust/">Ver anuncio</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>IA hibrida</h3>
+        <div class="list">
+          <div class="list-item">
+            <strong>NVIDIA presenta NVAQC para computacion cuantica acelerada</strong>
+            <p>18 Mar 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-worlds-first-accelerated-quantum-computing-research-center">Ver anuncio</a></p>
+          </div>
+          <div class="list-item">
+            <strong>NVIDIA anuncia NVQLink para integrar lo cuantico y lo clasico</strong>
+            <p>28 Oct 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-nvqlink">Ver anuncio</a></p>
+          </div>
+          <div class="list-item">
+            <strong>Rigetti publica apps de machine learning cuantico</strong>
+            <p>6 Dic 2022. <a href="https://www.rigetti.com/blog/quantum-machine-learning-apps-on-strangeworks">Ver anuncio</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Si necesitas ampliar alguna aplicacion con mas enlaces, lo actualizamos en minutos.
+  </footer>
+</body>
+</html>

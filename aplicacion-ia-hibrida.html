@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplicaciones - IA hibrida</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    :root {
+      --ink: #1a1f2b;
+      --paper: #f6f2ed;
+      --accent: #1d6e9b;
+      --accent-2: #f2b134;
+      --shadow: rgba(26, 31, 43, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 15% 10%, #e1f4ff 0%, transparent 42%),
+        radial-gradient(circle at 90% 0%, #fff2dc 0%, transparent 45%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 100%);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.8rem 6vw 0;
+      flex-wrap: wrap;
+    }
+
+    .logo-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.7rem;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid rgba(29, 110, 155, 0.22);
+      box-shadow: 0 12px 24px var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .logo-button img {
+      width: clamp(220px, 32vw, 360px);
+      height: auto;
+      display: block;
+    }
+
+    .directory {
+      display: grid;
+      gap: 0.25rem;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #2f3441;
+    }
+
+    header {
+      padding: 4.5rem 6vw 2rem;
+    }
+
+    .hero {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2.2rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      align-items: center;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(29, 110, 155, 0.12);
+      color: var(--accent);
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+    }
+
+    .hero h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.4rem, 4vw, 3.6rem);
+      line-height: 1.05;
+      margin: 0.9rem 0 1rem;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #2f3441;
+    }
+
+    .hero-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 1.8rem;
+      box-shadow: 0 20px 40px var(--shadow);
+      border: 1px solid rgba(26, 31, 43, 0.08);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-card ul {
+      display: grid;
+      gap: 0.6rem;
+      padding-left: 1.1rem;
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 6vw 5rem;
+      display: grid;
+      gap: 2.6rem;
+    }
+
+    .section-title {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+      margin-bottom: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.4rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .panel {
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 1.4rem 1.6rem;
+      box-shadow: 0 16px 32px var(--shadow);
+      border: 1px solid rgba(29, 110, 155, 0.14);
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .panel a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .panel a:hover {
+      text-decoration: underline;
+    }
+
+    .callout {
+      background: rgba(29, 110, 155, 0.08);
+      border-radius: 24px;
+      padding: 1.8rem;
+      border: 1px dashed rgba(29, 110, 155, 0.4);
+      display: grid;
+      gap: 0.8rem;
+      line-height: 1.6;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: inherit;
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid rgba(29, 110, 155, 0.18);
+      box-shadow: 0 10px 22px var(--shadow);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 6vw 3rem;
+      color: #2f3441;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .directory {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="logo-button" href="index.html" aria-label="Volver a la pagina principal">
+      <img src="LogoGCCCNyN.png" alt="Logo GCCC NyN" />
+    </a>
+    <div class="directory">
+      <strong>Directorio</strong>
+      <span>M. en C. Fernando Nieto Guadarrama.</span>
+      <span>Dr. Fernando Rojas Iñiguez.</span>
+      <span><a href="mailto:compcuanticacnyn@gmail.com">compcuanticacnyn@gmail.com</a></span>
+    </div>
+  </div>
+
+  <header>
+    <div class="hero">
+      <div>
+        <span class="tag">Aplicaciones hoy</span>
+        <h1>IA hibrida: cuando lo cuantico se integra al flujo clasico.</h1>
+        <p>
+          La investigacion en aprendizaje cuantico busca nuevas representaciones, kernels y circuitos variacionales que se
+          combinan con modelos clasicos. El foco actual es entender si hay ventajas medibles en tareas especificas y con
+          datos reales.
+        </p>
+      </div>
+      <div class="hero-card">
+        <strong>En pocas palabras</strong>
+        <ul>
+          <li>Se combinan capas clasicas con circuitos cuanticos.</li>
+          <li>La evidencia de ventaja es limitada y depende del problema.</li>
+          <li>Los mejores resultados son hibridos y bien acotados.</li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2 class="section-title">Donde se experimenta hoy</h2>
+      <div class="grid">
+        <article class="panel">
+          <strong>Modelos variacionales</strong>
+          <p>Capas cuanticas entrenadas junto con redes clasicas.</p>
+        </article>
+        <article class="panel">
+          <strong>Kernels cuanticos</strong>
+          <p>Mapeos de datos a espacios de alta dimension para clasificacion.</p>
+        </article>
+        <article class="panel">
+          <strong>Reduccion de dimensionalidad</strong>
+          <p>Codificaciones cuanticas para patrones con alta correlacion.</p>
+        </article>
+        <article class="panel">
+          <strong>Optimizacion de modelos</strong>
+          <p>Busqueda de hiperparametros y arquitecturas con apoyo cuantico.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="callout">
+      <h2 class="section-title">Estado actual</h2>
+      <p>
+        La mayor parte de los resultados son de investigacion. Los equipos exitosos empiezan con tareas pequenas, miden
+        generalizacion y comparan con modelos clasicos bien entrenados. La interpretabilidad y el costo total siguen siendo
+        factores decisivos.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="section-title">Preguntas para evaluar un caso</h2>
+      <div class="grid">
+        <article class="panel">
+          <strong>Que ventaja buscas</strong>
+          <p>Mejor precision, menor tiempo de entrenamiento o nuevas representaciones.</p>
+        </article>
+        <article class="panel">
+          <strong>Que datos son criticos</strong>
+          <p>Identifica si el conjunto es pequeno, ruidoso o con alta correlacion.</p>
+        </article>
+        <article class="panel">
+          <strong>Que baseline clasico existe</strong>
+          <p>Compara con modelos clasicos de alto desempeno antes de concluir.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Explora otras aplicaciones</h2>
+      <div class="nav-links">
+        <a href="aplicacion-optimizacion.html">Optimizacion</a>
+        <a href="aplicacion-quimica-materiales.html">Quimica y materiales</a>
+        <a href="aplicacion-seguridad.html">Seguridad</a>
+        <a href="index.html">Volver a la pagina principal</a>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Actualizaciones recientes</h2>
+      <div class="grid">
+        <article class="panel">
+          <strong>NVIDIA presenta NVAQC para computacion cuantica acelerada</strong>
+          <p>18 Mar 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-worlds-first-accelerated-quantum-computing-research-center">Ver anuncio</a></p>
+        </article>
+        <article class="panel">
+          <strong>NVIDIA anuncia NVQLink para integrar lo cuantico y lo clasico</strong>
+          <p>28 Oct 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-nvqlink">Ver anuncio</a></p>
+        </article>
+        <article class="panel">
+          <strong>Rigetti publica apps de machine learning cuantico</strong>
+          <p>6 Dic 2022. <a href="https://www.rigetti.com/blog/quantum-machine-learning-apps-on-strangeworks">Ver anuncio</a></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    En IA hibrida, la medicion rigurosa importa tanto como la creatividad del modelo.
+  </footer>
+</body>
+</html>

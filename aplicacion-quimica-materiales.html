@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aplicaciones - Quimica y materiales</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    :root {
+      --ink: #1a1f2b;
+      --paper: #f6f2ed;
+      --accent: #375a7f;
+      --accent-2: #f2b134;
+      --accent-3: #7a4e2d;
+      --shadow: rgba(26, 31, 43, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 10% 10%, #e7f0ff 0%, transparent 40%),
+        radial-gradient(circle at 85% 0%, #fff1db 0%, transparent 45%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 100%);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.8rem 6vw 0;
+      flex-wrap: wrap;
+    }
+
+    .logo-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.7rem;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid rgba(55, 90, 127, 0.22);
+      box-shadow: 0 12px 24px var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .logo-button img {
+      width: clamp(220px, 32vw, 360px);
+      height: auto;
+      display: block;
+    }
+
+    .directory {
+      display: grid;
+      gap: 0.25rem;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #2f3441;
+    }
+
+    .directory a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    header {
+      padding: 4.5rem 6vw 2rem;
+    }
+
+    .hero {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      gap: 2.2rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      align-items: center;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(55, 90, 127, 0.12);
+      color: var(--accent);
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+    }
+
+    .hero h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.4rem, 4vw, 3.6rem);
+      line-height: 1.05;
+      margin: 0.9rem 0 1rem;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: #2f3441;
+    }
+
+    .hero-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 1.8rem;
+      box-shadow: 0 20px 40px var(--shadow);
+      border: 1px solid rgba(26, 31, 43, 0.08);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-card ul {
+      display: grid;
+      gap: 0.6rem;
+      padding-left: 1.1rem;
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 6vw 5rem;
+      display: grid;
+      gap: 2.6rem;
+    }
+
+    .section-title {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+      margin-bottom: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.4rem;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .panel {
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 1.4rem 1.6rem;
+      box-shadow: 0 16px 32px var(--shadow);
+      border: 1px solid rgba(55, 90, 127, 0.14);
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .panel a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .panel a:hover {
+      text-decoration: underline;
+    }
+
+    .callout {
+      background: rgba(55, 90, 127, 0.08);
+      border-radius: 24px;
+      padding: 1.8rem;
+      border: 1px dashed rgba(55, 90, 127, 0.4);
+      display: grid;
+      gap: 0.8rem;
+      line-height: 1.6;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: inherit;
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid rgba(55, 90, 127, 0.18);
+      box-shadow: 0 10px 22px var(--shadow);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 6vw 3rem;
+      color: #2f3441;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .directory {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="logo-button" href="index.html" aria-label="Volver a la pagina principal">
+      <img src="LogoGCCCNyN.png" alt="Logo GCCC NyN" />
+    </a>
+    <div class="directory">
+      <strong>Directorio</strong>
+      <span>M. en C. Fernando Nieto Guadarrama.</span>
+      <span>Dr. Fernando Rojas Iñiguez.</span>
+      <span><a href="mailto:compcuanticacnyn@gmail.com">compcuanticacnyn@gmail.com</a></span>
+    </div>
+  </div>
+
+  <header>
+    <div class="hero">
+      <div>
+        <span class="tag">Aplicaciones hoy</span>
+        <h1>Quimica y materiales: simular lo que el laboratorio tarda anos.</h1>
+        <p>
+          Las moleculas y los materiales se comportan de formas que son muy costosas de calcular en computadoras clasicas.
+          La promesa cuantica esta en modelar esas interacciones con mas fidelidad para acelerar descubrimientos en energia,
+          salud y manufactura avanzada.
+        </p>
+      </div>
+      <div class="hero-card">
+        <strong>En pocas palabras</strong>
+        <ul>
+          <li>Simular electrones es exponencialmente dificil con metodos clasicos.</li>
+          <li>Los dispositivos cuanticos representan mejor esos estados fisicos.</li>
+          <li>El impacto se mide con propiedades quimicas verificables.</li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2 class="section-title">Que se busca acelerar</h2>
+      <div class="grid">
+        <article class="panel">
+          <strong>Catalizadores</strong>
+          <p>Diseño de materiales que reducen energia en procesos industriales clave.</p>
+        </article>
+        <article class="panel">
+          <strong>Baterias y almacenamiento</strong>
+          <p>Exploracion de nuevos compuestos para mayor densidad y estabilidad.</p>
+        </article>
+        <article class="panel">
+          <strong>Farmacos</strong>
+          <p>Prediccion de interacciones moleculares para acelerar etapas tempranas.</p>
+        </article>
+        <article class="panel">
+          <strong>Materiales cuanticos</strong>
+          <p>Propiedades emergentes en superconductores o sensores avanzados.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="callout">
+      <h2 class="section-title">Estado actual</h2>
+      <p>
+        Hoy se trabaja con algoritmos variacionales que combinan optimizacion clasica y circuitos cuanticos. El reto es
+        manejar ruido, escalar el numero de qubits y validar resultados con datos experimentales. Los pilotos mas utiles
+        son los que comparan contra metodos de quimica computacional ya establecidos.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="section-title">Preguntas clave para un proyecto</h2>
+      <div class="grid">
+        <article class="panel">
+          <strong>Que propiedad quieres predecir</strong>
+          <p>Energia, geometria, reactividad o espectros medibles en laboratorio.</p>
+        </article>
+        <article class="panel">
+          <strong>Que modelo clasico usaras</strong>
+          <p>DFT u otras aproximaciones que sirvan como comparacion directa.</p>
+        </article>
+        <article class="panel">
+          <strong>Que tan ruidosa es la simulacion</strong>
+          <p>Define si la mitigacion de errores es suficiente para el caso.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Explora otras aplicaciones</h2>
+      <div class="nav-links">
+        <a href="aplicacion-optimizacion.html">Optimizacion</a>
+        <a href="aplicacion-seguridad.html">Seguridad</a>
+        <a href="aplicacion-ia-hibrida.html">IA hibrida</a>
+        <a href="index.html">Volver a la pagina principal</a>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Actualizaciones recientes</h2>
+      <div class="grid">
+        <article class="panel">
+          <strong>IBM y Pasqal anuncian alianza para quimica y materiales</strong>
+          <p>6 Jun 2024. <a href="https://www.ibm.com/quantum/blog/ibm-pasqal-collaboration">Ver anuncio</a></p>
+        </article>
+        <article class="panel">
+          <strong>NVIDIA presenta NVQLink para integrar HPC y computacion cuantica</strong>
+          <p>28 Oct 2025. <a href="https://nvidianews.nvidia.com/news/nvidia-announces-nvqlink">Ver anuncio</a></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    En quimica cuantica, una simulacion util debe conectar con medidas experimentales concretas.
+  </footer>
+</body>
+</html>
