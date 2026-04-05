@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ruido Cuántico: NISQ, corrección y tolerancia a fallos</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    :root {
+      --ink: #182027;
+      --text-muted: #2e3642;
+      --paper: #f6f2ea;
+      --panel: rgba(255, 255, 255, 0.9);
+      --accent: #2b7f6d;
+      --accent-2: #e7b34c;
+      --accent-3: #cc6e4a;
+      --accent-4: #2c5a9e;
+      --shadow: rgba(24, 32, 39, 0.16);
+      --outline: rgba(43, 127, 109, 0.18);
+      --soft: rgba(43, 127, 109, 0.08);
+      --note: #f0e6da;
+      --note-ink: #4d3a2c;
+      --ideal: #2c5a9e;
+      --noisy: #cc6e4a;
+      --good: #e2f1e7;
+      --good-ink: #16402a;
+      --warn: #f6ddd2;
+      --warn-ink: #5e2a16;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 18%, rgba(43, 127, 109, 0.18), transparent 55%),
+        radial-gradient(circle at 82% 12%, rgba(231, 179, 76, 0.2), transparent 50%),
+        radial-gradient(circle at 50% 85%, rgba(44, 90, 158, 0.18), transparent 45%),
+        linear-gradient(180deg, var(--paper) 0%, #efe7dc 55%, #ede3d5 100%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem 6vw 0;
+    }
+
+    .logo-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.45rem 0.7rem;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid rgba(43, 127, 109, 0.22);
+      box-shadow: 0 12px 24px var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .logo-button img {
+      width: clamp(280px, 38vw, 460px);
+      height: auto;
+      display: block;
+    }
+
+    .logo-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(24, 32, 39, 0.2);
+      border-color: rgba(43, 127, 109, 0.4);
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 4rem 6vw 5rem;
+      display: grid;
+      gap: 2.4rem;
+    }
+
+    .hero {
+      display: grid;
+      gap: 0.9rem;
+      max-width: 900px;
+    }
+
+    .hero h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2.5rem, 4.2vw, 3.8rem);
+      letter-spacing: 0.2px;
+    }
+
+    .hero p {
+      font-size: 1.08rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+
+    .hero .tagline {
+      background: var(--note);
+      color: var(--note-ink);
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      width: fit-content;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      border: 1px dashed rgba(77, 58, 44, 0.3);
+    }
+
+    .grid-two {
+      display: grid;
+      gap: 1.4rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .panel {
+      background: var(--panel);
+      border-radius: 22px;
+      padding: 1.6rem;
+      border: 1px solid var(--outline);
+      box-shadow: 0 18px 36px var(--shadow);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .panel h2 {
+      font-family: "Fraunces", serif;
+      font-size: 1.6rem;
+    }
+
+    .panel p {
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .chip-list {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 999px;
+      background: var(--soft);
+      border: 1px solid rgba(43, 127, 109, 0.2);
+      font-weight: 600;
+      font-size: 0.95rem;
+      width: fit-content;
+    }
+
+    .chip span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 18px;
+      padding: 1.3rem;
+      border: 1px solid rgba(24, 32, 39, 0.08);
+      box-shadow: 0 12px 28px rgba(24, 32, 39, 0.12);
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .card h3 {
+      font-family: "Fraunces", serif;
+      font-size: 1.2rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-size: 0.98rem;
+    }
+
+    .compare {
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .compare-grid {
+      display: grid;
+      gap: 1.2rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .compare-card {
+      border-radius: 20px;
+      padding: 1.4rem;
+      border: 1px solid rgba(24, 32, 39, 0.12);
+      box-shadow: 0 16px 30px rgba(24, 32, 39, 0.12);
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .compare-card.nisq {
+      background: linear-gradient(150deg, #fff6e8 0%, #fcecd4 100%);
+    }
+
+    .compare-card.ft {
+      background: linear-gradient(150deg, #e8f2ff 0%, #d8e6fb 100%);
+    }
+
+    .compare-card ul {
+      list-style: none;
+      display: grid;
+      gap: 0.45rem;
+      color: #2e3642;
+      font-size: 0.98rem;
+    }
+
+    .compare-card li::before {
+      content: "•";
+      margin-right: 0.4rem;
+      color: var(--accent-3);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .timeline-item {
+      padding: 1.1rem 1.2rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(24, 32, 39, 0.12);
+      box-shadow: 0 12px 24px rgba(24, 32, 39, 0.12);
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .timeline-item strong {
+      color: var(--accent-4);
+    }
+
+    .timeline-item p {
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid rgba(24, 32, 39, 0.15);
+    }
+
+    .pill.qec {
+      background: var(--good);
+      color: var(--good-ink);
+    }
+
+    .pill.qem {
+      background: var(--warn);
+      color: var(--warn-ink);
+    }
+
+    .sim {
+      background: var(--panel);
+      border-radius: 26px;
+      padding: 1.8rem;
+      border: 1px solid var(--outline);
+      box-shadow: 0 20px 40px var(--shadow);
+      display: grid;
+      gap: 1.6rem;
+    }
+
+    .sim-header {
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .sim-header h2 {
+      font-family: "Fraunces", serif;
+      font-size: 1.7rem;
+    }
+
+    .sim-header p {
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .sim-controls {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .sim-controls label {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .sim-controls input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .sim-grid {
+      display: grid;
+      gap: 1.4rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .histogram {
+      display: grid;
+      gap: 1rem;
+      padding: 1.2rem;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(31, 138, 112, 0.18);
+      box-shadow: 0 14px 28px rgba(26, 31, 43, 0.1);
+    }
+
+    .histogram h3 {
+      font-family: "Fraunces", serif;
+      font-size: 1.2rem;
+      color: #1b1b1b;
+    }
+
+    .histogram-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(110px, 1fr));
+      gap: 0.8rem;
+    }
+
+    .histogram-bar {
+      display: grid;
+      gap: 0.5rem;
+      align-items: end;
+      padding: 0.7rem;
+      border-radius: 14px;
+      background: rgba(31, 138, 112, 0.08);
+      border: 1px solid rgba(31, 138, 112, 0.16);
+      min-height: 160px;
+      position: relative;
+    }
+
+    .bar-stack {
+      position: relative;
+      height: 110px;
+    }
+
+    .bar-fill,
+    .bar-outline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 12px 12px 8px 8px;
+      transition: height 0.3s ease;
+      height: 0%;
+    }
+
+    .bar-fill {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(204, 110, 74, 0.85), rgba(204, 110, 74, 0.35));
+      z-index: 2;
+    }
+
+    .bar-outline {
+      border: 2px dashed rgba(44, 90, 158, 0.85);
+      background: transparent;
+      z-index: 3;
+    }
+
+    .bar-label {
+      font-weight: 600;
+      color: #1b1b1b;
+      text-align: center;
+    }
+
+    .bar-value {
+      font-size: 0.9rem;
+      text-align: center;
+      color: #2f3441;
+    }
+
+    .error-note {
+      background: var(--warn);
+      color: var(--warn-ink);
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(94, 42, 22, 0.2);
+      font-size: 0.95rem;
+    }
+
+    .circuit {
+      display: grid;
+      gap: 1.2rem;
+      padding: 1.2rem 1rem 1.4rem;
+      border-radius: 20px;
+      background: linear-gradient(120deg, rgba(31, 138, 112, 0.08), rgba(242, 177, 52, 0.08));
+      border: 1px solid rgba(26, 31, 43, 0.08);
+    }
+
+    .wire-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .ket-label {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--accent-3);
+      background: rgba(122, 78, 45, 0.08);
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(122, 78, 45, 0.2);
+      min-width: 64px;
+      text-align: center;
+    }
+
+    .gate-track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(28px, 1fr));
+      gap: 0.5rem;
+      padding: 0.5rem 0.2rem;
+    }
+
+    .gate-track::before {
+      content: "";
+      position: absolute;
+      left: 0.2rem;
+      right: 0.2rem;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(26, 31, 43, 0.2), rgba(26, 31, 43, 0.4), rgba(26, 31, 43, 0.2));
+      transform: translateY(-50%);
+      z-index: 0;
+    }
+
+    .gate-slot {
+      position: relative;
+      z-index: 1;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid rgba(31, 138, 112, 0.45);
+      background: rgba(255, 255, 255, 0.7);
+      display: grid;
+      place-items: center;
+    }
+
+    .gate-token {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      background: rgba(31, 138, 112, 0.16);
+      border: 1px solid rgba(31, 138, 112, 0.5);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #15483d;
+    }
+
+    .gate-token.cnot-control {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #1f2a2a;
+      border: 2px solid #1f2a2a;
+      color: transparent;
+    }
+
+    .gate-token.cnot-target {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #1f2a2a;
+      position: relative;
+      color: transparent;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .gate-token.cnot-target::before,
+    .gate-token.cnot-target::after {
+      content: "";
+      position: absolute;
+      background: #1f2a2a;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .gate-token.cnot-target::before {
+      width: 10px;
+      height: 2px;
+    }
+
+    .gate-token.cnot-target::after {
+      width: 2px;
+      height: 10px;
+    }
+
+    .gate-slot.has-cnot::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      background: rgba(31, 31, 31, 0.8);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 0;
+    }
+
+    .gate-slot.has-cnot[data-qubit="0"]::after {
+      top: 50%;
+      height: 64px;
+    }
+
+    .gate-slot.has-cnot[data-qubit="1"]::after {
+      bottom: 50%;
+      height: 64px;
+    }
+
+    .source-list {
+      list-style: none;
+      display: grid;
+      gap: 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .source-list li {
+      background: rgba(255, 255, 255, 0.86);
+      border-radius: 12px;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid rgba(24, 32, 39, 0.1);
+    }
+
+    .source-list a {
+      color: var(--accent-4);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      color: rgba(24, 32, 39, 0.55);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 720px) {
+      .sim-controls label {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="logo-button" href="index.html" aria-label="Volver al inicio">
+      <img src="LogoGCCCNyN.png" alt="Logo GCCCNyN" />
+    </a>
+  </div>
+
+  <main class="shell">
+    <section class="hero">
+      <span class="tagline">Concepto clave: Ruido</span>
+      <h1>Ruido cuántico: el obstáculo invisible entre NISQ y la era tolerante a fallos</h1>
+      <p>
+        En computación cuántica, el ruido es cualquier proceso físico no deseado que altera el estado de los qubits y
+        distorsiona los resultados. La pregunta clave no es si hay ruido, sino cómo detectarlo, mitigarlo y corregirlo
+        para pasar de dispositivos NISQ a computadoras tolerantes a fallos.
+      </p>
+    </section>
+
+    <section class="grid-two">
+      <article class="panel">
+        <h2>¿Qué significa “ruido” en comp. cuántica?</h2>
+        <p>
+          El ruido es la suma de errores de control, decoherencia y medición que afectan a los qubits. En NISQ, estos
+          errores limitan la longitud de los circuitos que se pueden ejecutar de forma confiable. Esto incluye pérdida de
+          coherencia, desajustes de fase, errores de puertas, crosstalk entre qubits y lecturas imperfectas.
+        </p>
+        <div class="chip-list">
+          <div class="chip">Decoherencia <span>(T1/T2, pérdida de fase)</span></div>
+          <div class="chip">Errores de puerta <span>(sobre/infra-rotaciones)</span></div>
+          <div class="chip">Crosstalk <span>(interacciones no deseadas)</span></div>
+          <div class="chip">Lectura imperfecta <span>(readout bias)</span></div>
+          <div class="chip">Pérdida de fotones <span>(arquitecturas ópticas)</span></div>
+        </div>
+      </article>
+
+      <article class="panel compare">
+        <h2>NISQ vs. Fault-Tolerant</h2>
+        <div class="compare-grid">
+          <div class="compare-card nisq">
+            <h3>Era NISQ (actual)</h3>
+            <ul>
+              <li>NISQ = “Noisy Intermediate-Scale Quantum”.</li>
+              <li>Decenas o cientos de qubits físicos.</li>
+              <li>Errores dominan: circuitos cortos.</li>
+              <li>Usa mitigación/supresión, no corrección completa.</li>
+              <li>Resultados útiles pero frágiles.</li>
+            </ul>
+          </div>
+          <div class="compare-card ft">
+            <h3>Era Fault-Tolerant (siguiente)</h3>
+            <ul>
+              <li>Qubits lógicos protegidos por códigos.</li>
+              <li>Errores corregidos de forma activa y continua.</li>
+              <li>Escalamiento confiable y algoritmos largos.</li>
+              <li>Coste alto, pero resultados estables y reproducibles.</li>
+            </ul>
+          </div>
+        </div>
+        <p>
+          La transición real ocurre cuando la corrección supera el umbral y el error lógico disminuye al crecer el código.
+          Ese “descenso del error lógico” marca el inicio de la era tolerante a fallos.
+        </p>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>¿Por qué fotones, qubits topológicos y qubits lógicos están más cerca?</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Fotones</h3>
+          <p>
+            La óptica integrada ha demostrado fuentes de qubits GKP (Gottesman–Kitaev–Preskill), una codificación
+            bosónica que apunta a esquemas tolerantes a fallos con ruido intrínseco bajo.
+          </p>
+        </article>
+        <article class="card">
+          <h3>Qubits topológicos</h3>
+          <p>
+            En qubits topológicos, la información vive en propiedades globales del sistema, haciéndolos más robustos
+            frente a perturbaciones locales. La meta es reducir el costo de corrección de errores desde el hardware.
+          </p>
+        </article>
+        <article class="card">
+          <h3>Qubits lógicos</h3>
+          <p>
+            Un qubit lógico se construye con muchos qubits físicos mediante códigos (por ejemplo, surface code).
+            La evidencia de “error lógico decreciente” al aumentar la distancia del código es un indicador clave.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Noticias: QEC vs QEM (y sus diferencias)</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <strong>QEC (Corrección de errores) · 9 de diciembre de 2024</strong>
+          <p>
+            Se reportó una memoria de surface code por debajo del umbral, mostrando reducción del error lógico al
+            incrementar la distancia del código.
+          </p>
+          <span class="pill qec">QEC</span>
+        </div>
+        <div class="timeline-item">
+          <strong>QEM (Mitigación) · 6 de febrero de 2023</strong>
+          <p>
+            Se mostró que la extrapolación a cero ruido (ZNE) puede escalar a circuitos con decenas de qubits y
+            profundidades relevantes.
+          </p>
+          <span class="pill qem">QEM</span>
+        </div>
+        <div class="timeline-item">
+          <strong>QEM (Límites) · 25 de julio de 2024</strong>
+          <p>
+            Se reportaron límites estrictos sobre el costo de muestreo en mitigación, lo que impone techos prácticos
+            para ciertos tamaños y profundidades de circuito.
+          </p>
+          <span class="pill qem">QEM</span>
+        </div>
+      </div>
+      <p>
+        <strong>Diferencia esencial:</strong> la QEC corrige errores con qubits extra y decodificación en tiempo real,
+        reduciendo el error lógico conforme crece el código. La QEM mitiga el error con post-procesamiento (ZNE, PEC,
+        supresión) sin proteger el estado durante la ejecución.
+      </p>
+    </section>
+
+    <section class="sim" id="simulador">
+      <div class="sim-header">
+        <h2>Mini simulador: circuito base + ruido controlado</h2>
+        <p>
+          Usamos el circuito típico de dos qubits del simulador (H + CNOT) para preparar un estado entrelazado. El
+          histograma ideal se compara con el histograma ruidoso, donde cada qubit sufre un bit-flip con probabilidad <strong>p</strong>.
+        </p>
+      </div>
+      <div class="circuit" aria-label="Circuito base del simulador">
+        <div class="wire-row">
+          <div class="ket-label">|0&gt;</div>
+          <div class="gate-track">
+            <div class="gate-slot"><div class="gate-token">H</div></div>
+            <div class="gate-slot has-cnot" data-qubit="0"><div class="gate-token cnot-control"></div></div>
+            <div class="gate-slot"></div>
+            <div class="gate-slot"></div>
+            <div class="gate-slot"></div>
+            <div class="gate-slot"></div>
+          </div>
+        </div>
+        <div class="wire-row">
+          <div class="ket-label">|0&gt;</div>
+          <div class="gate-track">
+            <div class="gate-slot"></div>
+            <div class="gate-slot has-cnot" data-qubit="1"><div class="gate-token cnot-target"></div></div>
+            <div class="gate-slot"></div>
+            <div class="gate-slot"></div>
+            <div class="gate-slot"></div>
+            <div class="gate-slot"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sim-controls">
+        <label>
+          Nivel de error p
+          <span id="errorValue">5%</span>
+        </label>
+        <input id="errorRange" type="range" min="0" max="25" step="1" value="5" />
+      </div>
+      <div class="sim-grid">
+        <div class="histogram" id="noiseHistogram">
+          <h3>Histograma (exacto vs con error)</h3>
+          <div class="histogram-grid">
+            <div class="histogram-bar">
+              <div class="bar-stack">
+                <div class="bar-fill" data-bar-noisy="0"></div>
+                <div class="bar-outline" data-bar-ideal="0"></div>
+              </div>
+              <div class="bar-label">|00⟩</div>
+              <div class="bar-value" data-value="0">0%</div>
+            </div>
+            <div class="histogram-bar">
+              <div class="bar-stack">
+                <div class="bar-fill" data-bar-noisy="1"></div>
+                <div class="bar-outline" data-bar-ideal="1"></div>
+              </div>
+              <div class="bar-label">|01⟩</div>
+              <div class="bar-value" data-value="1">0%</div>
+            </div>
+            <div class="histogram-bar">
+              <div class="bar-stack">
+                <div class="bar-fill" data-bar-noisy="2"></div>
+                <div class="bar-outline" data-bar-ideal="2"></div>
+              </div>
+              <div class="bar-label">|10⟩</div>
+              <div class="bar-value" data-value="2">0%</div>
+            </div>
+            <div class="histogram-bar">
+              <div class="bar-stack">
+                <div class="bar-fill" data-bar-noisy="3"></div>
+                <div class="bar-outline" data-bar-ideal="3"></div>
+              </div>
+              <div class="bar-label">|11⟩</div>
+              <div class="bar-value" data-value="3">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="error-note" id="errorNote">Error total (distancia): 0.0%</div>
+    </section>
+
+    <section class="panel">
+      <h2>Fuentes (selección)</h2>
+      <ul class="source-list">
+        <li><a href="https://quantum-journal.org/papers/q-2018-08-06-79/" target="_blank" rel="noreferrer">Preskill, “Quantum Computing in the NISQ era and beyond” (Quantum, 2018)</a>.</li>
+        <li><a href="https://www.nature.com/articles/s41586-024-08449-y" target="_blank" rel="noreferrer">“Quantum error correction below the surface code threshold” (Nature, publicado 9 Dic 2024)</a>.</li>
+        <li><a href="https://www.nature.com/articles/s41567-022-01914-3" target="_blank" rel="noreferrer">“Scalable error mitigation for noisy quantum circuits produces competitive expectation values” (Nature Physics, 6 Feb 2023)</a>.</li>
+        <li><a href="https://www.nature.com/articles/s41567-024-02536-7" target="_blank" rel="noreferrer">“Exponentially tighter bounds on limitations of quantum error mitigation” (Nature Physics, 25 Jul 2024)</a>.</li>
+        <li><a href="https://www.nature.com/articles/s41586-025-09044-5" target="_blank" rel="noreferrer">“Integrated photonic source of GKP qubits” (Nature, 4 Jun 2025)</a>.</li>
+        <li><a href="https://quantum.microsoft.com/en-us/insights/education/concepts/topological-qubits" target="_blank" rel="noreferrer">Microsoft Quantum, “Topological qubits”</a>.</li>
+        <li><a href="https://quantum.cloud.ibm.com/docs/en/guides/error-mitigation-and-suppression-techniques" target="_blank" rel="noreferrer">IBM Quantum Docs, “Error mitigation and suppression techniques”</a>.</li>
+      </ul>
+    </section>
+
+    <footer>
+      Hecho para el módulo de conceptos cuánticos · Ruido
+    </footer>
+  </main>
+
+  <script src="simulador-core.js"></script>
+  <script>
+    const errorRange = document.getElementById('errorRange');
+    const errorValue = document.getElementById('errorValue');
+    const noiseHistogram = document.getElementById('noiseHistogram');
+    const barNoisy = noiseHistogram.querySelectorAll('[data-bar-noisy]');
+    const barIdeal = noiseHistogram.querySelectorAll('[data-bar-ideal]');
+    const barValues = noiseHistogram.querySelectorAll('[data-value]');
+    const errorNote = document.getElementById('errorNote');
+
+    const steps = [
+      { type: 'single', gate: 'H', target: 0 },
+      { type: 'cnot', control: 0, target: 1 }
+    ];
+
+    const idealState = SimuladorCore.computeStateFromSteps(steps);
+    const idealProbs = SimuladorCore.stateToProbs(idealState);
+
+    const updateSim = () => {
+      const p = Number(errorRange.value) / 100;
+      errorValue.textContent = `${Math.round(p * 100)}%`;
+
+      const noisyProbs = SimuladorCore.applyBitFlipNoise(idealProbs, p);
+
+      idealProbs.forEach((ideal, idx) => {
+        const idealPct = Math.min(100, Math.max(0, ideal * 100));
+        const noisyPct = Math.min(100, Math.max(0, noisyProbs[idx] * 100));
+        const idealBar = barIdeal[idx];
+        const noisyBar = barNoisy[idx];
+        const value = barValues[idx];
+
+        if (idealBar) idealBar.style.height = `${idealPct}%`;
+        if (noisyBar) noisyBar.style.height = `${noisyPct}%`;
+        if (value) value.textContent = `ruidoso ${noisyPct.toFixed(1)}% · exacto ${idealPct.toFixed(1)}%`;
+      });
+
+      const distance = noisyProbs.reduce((acc, prob, idx) => acc + Math.abs(prob - idealProbs[idx]), 0) / 2;
+      errorNote.textContent = `Error total (distancia): ${(distance * 100).toFixed(1)}%`;
+    };
+
+    errorRange.addEventListener('input', updateSim);
+    updateSim();
+  </script>
+</body>
+</html>
